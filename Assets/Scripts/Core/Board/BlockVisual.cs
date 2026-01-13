@@ -6,19 +6,21 @@ namespace Core.Board
     public class BlockVisual : MonoBehaviour
     {
         private BlockType _type;
-        private Vector2Int _position;
+        private Vector2Int _gridPosition;
         
-        public void Init(BlockType type, Vector2Int position, Vector3 worldPosition)
+        public Vector2Int GridPosition => _gridPosition;
+        
+        public void Init(BlockType type, Vector2Int gridPosition, Vector3 worldPosition)
         {
             _type = type;
-            _position = position;
+            _gridPosition = gridPosition;
             transform.localPosition = worldPosition;
             gameObject.SetActive(true);
         }
 
-        public void UpdatePosition(Vector2Int position, Vector3 worldPosition)
+        public void UpdatePosition(Vector2Int gridPosition, Vector3 worldPosition)
         {
-            _position = position;
+            _gridPosition = gridPosition;
             transform.localPosition = worldPosition;
         }
     }

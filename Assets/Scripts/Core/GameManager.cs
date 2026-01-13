@@ -1,13 +1,13 @@
 using Core.Board;
-using Enums;
+using Core.Input;
 using UnityEngine;
 
 namespace Core
 {
     public class GameManager : MonoBehaviour
     {
+        [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
-        [SerializeField] private SwipeInput _swipeInput;
         private ResourceProviderService _resourceProviderService;
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
@@ -43,14 +43,10 @@ namespace Core
                 _boardModel.Set(block.Position.x, block.Position.y, data);
             }
             
+            _boardSystem = new BoardSystem(_boardModel, _boardVisual);
             _boardVisual.CreateBoard(level);
             
-            _swipeInput.OnSwipe += OnSwipe;
-        }
-
-        private void OnSwipe(Vector2 delta, SwipeDirection direction)
-        {
-            Debug.Log($"Swipe Direction: {direction}, Pos: {delta.x}, {delta.y}");
+            _inputController.Init(_boardSystem);
         }
     }
 }

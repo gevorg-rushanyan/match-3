@@ -2,7 +2,7 @@ using System;
 using Enums;
 using UnityEngine;
 
-namespace Core
+namespace Core.Input
 {
     public class SwipeInput : MonoBehaviour
     {
@@ -12,6 +12,7 @@ namespace Core
         private Vector2 _startPos;
         private bool _isSwiping;
         
+        // TODO 
         private float MinSwipeDistance
         {
             get
@@ -34,27 +35,27 @@ namespace Core
 
         private void HandleMouse()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (UnityEngine.Input.GetMouseButtonDown(0))
             {
-                _startPos = Input.mousePosition;
+                _startPos = UnityEngine.Input.mousePosition;
                 _isSwiping = true;
             }
 
-            if (Input.GetMouseButtonUp(0) && _isSwiping)
+            if (UnityEngine.Input.GetMouseButtonUp(0) && _isSwiping)
             {
-                DetectSwipe(Input.mousePosition);
+                DetectSwipe(UnityEngine.Input.mousePosition);
                 _isSwiping = false;
             }
         }
 
         private void HandleTouch()
         {
-            if (Input.touchCount == 0)
+            if (UnityEngine.Input.touchCount == 0)
             {
                 return;
             }
 
-            var touch = Input.GetTouch(0);
+            var touch = UnityEngine.Input.GetTouch(0);
 
             if (touch.phase == TouchPhase.Began)
             {
