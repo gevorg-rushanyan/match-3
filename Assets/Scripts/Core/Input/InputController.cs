@@ -22,7 +22,7 @@ namespace Core.Input
             _boardSystem = boardSystem;
         }
 
-        private void HandleSwipe(Vector2 screenPos, SwipeDirection direction)
+        private void HandleSwipe(Vector2 screenPos, SwipeDirection swipeDirection)
         {
             var block = GetBlockUnderScreen(screenPos);
             if (block == null)
@@ -31,16 +31,19 @@ namespace Core.Input
             }
 
             Vector2Int from = block.GridPosition;
-            Vector2Int to = from + DirectionToOffset(direction);
+            Vector2Int direction = DirectionToOffset(swipeDirection);
+            Vector2Int to = from + direction;
 
-            _boardSystem.MoveBlock(from, to);
+            _boardSystem.TryMoveBlock(from, to, direction);
         }
 
         private BlockVisual GetBlockUnderScreen(Vector2 screenPos)
         {
-            Ray ray = _camera.ScreenPointToRay(screenPos);
+            Vector2 worldPos = _camera.ScreenToWorldPoint(screenPos);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _blockLayer))
+            RaycastHit2D hit = Physics2D.Raycast(worldPos, Vector2.zero, Mathf.Infinity, _blockLayer);
+
+            if (hit.collider != null)
             {
                 return hit.collider.GetComponent<BlockVisual>();
             }

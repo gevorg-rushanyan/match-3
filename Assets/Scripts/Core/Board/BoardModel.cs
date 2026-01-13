@@ -47,5 +47,10 @@ namespace Core.Board
         {
             return x >= 0 && x < _width && y >= 0 && y < _height;
         }
+        
+        public bool IsEmpty(int x, int y)
+        {
+            return InBounds(x, y) && _grid[x, y] == null;
+        }
     }
 }

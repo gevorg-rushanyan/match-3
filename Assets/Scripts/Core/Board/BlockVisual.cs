@@ -18,10 +18,17 @@ namespace Core.Board
             gameObject.SetActive(true);
         }
 
-        public void UpdatePosition(Vector2Int gridPosition, Vector3 worldPosition)
+        public void SetGridPosition(Vector2Int pos)
         {
-            _gridPosition = gridPosition;
-            transform.localPosition = worldPosition;
+            _gridPosition = pos;
+        }
+
+        public void MoveTo(Vector3 worldPos)
+        {
+            transform.localPosition = worldPos;
+
+            // Later
+            // StartCoroutine(MoveCoroutine(worldPos));
         }
     }
 }

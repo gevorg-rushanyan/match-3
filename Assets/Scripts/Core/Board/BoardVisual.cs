@@ -66,6 +66,61 @@ namespace Core.Board
             _blocksContainer.position = position; 
         }
 
+        public void MoveVisual(Vector2Int from, Vector2Int to)
+        {
+            if (_visualGrid == null)
+            {
+                return;
+            }
+            
+            if (!InBounds(from) || !InBounds(to))
+            {
+                return;
+            }
+            
+            var block = _visualGrid[from.x, from.y];
+            if (block == null)
+            {
+                return;
+            }
+
+            _visualGrid[from.x, from.y] = null;
+            _visualGrid[to.x, to.y] = block;
+            
+            block.SetGridPosition(to);
+            block.MoveTo(BlockPosition(to.x, to.y));
+        }
+        
+        public void SwapVisual(Vector2Int a, Vector2Int b)
+        {
+            if (_visualGrid == null)
+            {
+                return;
+            }
+            
+            if (!InBounds(a) || !InBounds(b))
+            {
+                return;
+            }
+            
+            var blockA = _visualGrid[a.x, a.y];
+            var blockB = _visualGrid[b.x, b.y];
+
+            if (blockA == null || blockB == null)
+            {
+                return;
+            }
+
+            _visualGrid[a.x, a.y] = blockB;
+            _visualGrid[b.x, b.y] = blockA;
+
+            blockA.SetGridPosition(b);
+            blockB.SetGridPosition(a);
+
+            blockA.MoveTo(BlockPosition(b.x, b.y));
+            blockB.MoveTo(BlockPosition(a.x, a.y));
+        }
+
         private BlockVisual TryCreateBlock(BlockConfig blockConfig)
         {
             var position = BlockPosition(blockConfig.Position.x, blockConfig.Position.y);
@@ -85,6 +140,7 @@ namespace Core.Board
             return blockVisual;
         }
         
+        // TODO rename to GridToWordldPosition
         private Vector3 BlockPosition(int x, int y)
         {
             return new Vector3(x * _blockSize.x, y * _blockSize.y, x * _blockZPositionOffset + y * _blockZPositionOffset);
@@ -111,6 +167,11 @@ namespace Core.Board
             }
 
             _visualGrid = null;
+        }
+        
+        private bool InBounds(Vector2Int pos)
+        {
+            return pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
         }
     }
 }
