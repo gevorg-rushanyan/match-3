@@ -1,7 +1,7 @@
 using Enums;
 using UnityEngine;
 
-namespace Core
+namespace Core.Board
 {
     public class BlockVisual : MonoBehaviour
     {

@@ -3,9 +3,9 @@ using Configs;
 using Enums;
 using UnityEngine;
 
-namespace Core
+namespace Core.Board
 {
-    public class BoardController : MonoBehaviour
+    public class BoardVisual : MonoBehaviour
     {
         [SerializeField] private Transform _blocksContainer;
         
@@ -90,7 +90,7 @@ namespace Core
             return new Vector3(x * _blockSize.x, y * _blockSize.y, x * _blockZPositionOffset + y * _blockZPositionOffset);
         }
         
-        public void ClearBoard()
+        private void ClearBoard()
         {
             if (_visualGrid == null)
             {
