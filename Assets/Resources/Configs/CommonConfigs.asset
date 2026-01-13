@@ -16,6 +16,6 @@ MonoBehaviour:
   _blockZPositionOffset: -0.01
   _blockVisualConfigs:
   - _type: 1
-    _prefab: {fileID: 2728771879252220868, guid: 778b36c314f6d47fcb2fba815930d2dc, type: 3}
+    _prefab: {fileID: 2807550067619788525, guid: 778b36c314f6d47fcb2fba815930d2dc, type: 3}
   - _type: 0
-    _prefab: {fileID: 8625448591957632077, guid: 275f13e20348442c6abb6755c25a04f9, type: 3}
+    _prefab: {fileID: 1287138287207885918, guid: 275f13e20348442c6abb6755c25a04f9, type: 3}
