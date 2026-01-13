@@ -16,11 +16,19 @@ namespace Core
 
         private void Start()
         {
-            var levelsConfig = _resourceProviderService.GetLevelsConfig();
-            if (levelsConfig != null)
+            var commonConfigs = _resourceProviderService.GetCommonConfigs();
+            if (commonConfigs == null)
             {
-                _boardController.CreateBoard(levelsConfig.Levels[0]);
+                return;
             }
+            _boardController.Init(commonConfigs);
+            
+            var levelsConfig = _resourceProviderService.GetLevelsConfig();
+            if (levelsConfig == null)
+            {
+                return;
+            }
+            _boardController.CreateBoard(levelsConfig.Levels[0]);
         }
     }
 }
