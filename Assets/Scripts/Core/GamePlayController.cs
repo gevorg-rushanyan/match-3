@@ -55,7 +55,35 @@ namespace Core
                 StopCoroutine(_gravityCoroutine);
             }
             
-            _gravityCoroutine = StartCoroutine(GravityWithDelay());
+            // _gravityCoroutine = StartCoroutine(GravityWithDelay());
+            _gravityCoroutine = StartCoroutine(Normalize());
+        }
+        
+        private IEnumerator Normalize()
+        {
+            yield return new WaitForSeconds(_gravityDelay);
+
+            while (true)
+            {
+                // 1️⃣ гравитация
+                while (_boardSystem.ApplyGravity())
+                {
+                    yield return new WaitForSeconds(0.2f);
+                }
+
+                // 2️⃣ поиск матчей
+                var areas = _boardSystem.FindDestroyAreas();
+                if (areas.Count == 0)
+                {
+                    break;
+                }
+
+                // 3️⃣ уничтожение
+                _boardSystem.DestroyAreas(areas);
+
+                // 4️⃣ пауза перед следующей гравитацией
+                yield return new WaitForSeconds(_gravityDelay);
+            }
         }
         
         private IEnumerator GravityWithDelay()

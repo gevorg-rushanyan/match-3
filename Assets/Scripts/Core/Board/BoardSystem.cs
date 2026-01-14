@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Board
@@ -93,6 +94,64 @@ namespace Core.Board
             }
 
             return anyMoved;
+        }
+        
+        public List<List<Vector2Int>> FindDestroyAreas()
+        {
+            var result = new List<List<Vector2Int>>();
+            var visited = new bool[_model.Width, _model.Height];
+
+            for (int x = 0; x < _model.Width; x++)
+            {
+                for (int y = 0; y < _model.Height; y++)
+                {
+                    if (visited[x, y])
+                    {
+                        continue;
+                    }
+
+                    var block = _model.Get(x, y);
+                    if (block == null)
+                    {
+                        continue;
+                    }
+
+                    var area = _model.GetConnectedArea(new Vector2Int(x, y));
+                    if (area == null || area.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var p in area)
+                    {
+                        visited[p.x, p.y] = true;
+                    }
+
+                    if (_model.HasMatchLine(area))
+                    {
+                        result.Add(area);
+                    }
+                }
+            }
+
+            return result;
+        }
+        
+        public bool DestroyAreas(List<List<Vector2Int>> areas)
+        {
+            if (areas == null || areas.Count == 0)
+                return false;
+
+            foreach (var area in areas)
+            {
+                foreach (var pos in area)
+                {
+                    _model.Remove(pos.x, pos.y);
+                    _view.DestroyVisual(pos);
+                }
+            }
+
+            return true;
         }
     }
 }

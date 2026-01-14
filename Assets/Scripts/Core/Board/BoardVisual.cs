@@ -131,6 +131,21 @@ namespace Core.Board
             blockA.MoveTo(BlockPosition(b.x, b.y));
             blockB.MoveTo(BlockPosition(a.x, a.y));
         }
+        
+        public void DestroyVisual(Vector2Int pos)
+        {
+            var block = _visualGrid[pos.x, pos.y];
+            if (block == null)
+            {
+                return;
+            }
+
+            _visualGrid[pos.x, pos.y] = null;
+            block.PlayDestroyAnimation(() =>
+            {
+                Destroy(block.gameObject);
+            });
+        }
 
         private BlockVisual TryCreateBlock(BlockConfig blockConfig)
         {

@@ -8,10 +8,13 @@ namespace Core.Board
     public class BlockVisual : MonoBehaviour
     {
         [SerializeField] private float _moveDuration = 0.15f;
+        [SerializeField] private float _destroyDuration = 0.15f;
         private BlockVisualState _state;
         private BlockType _type;
         private Vector2Int _gridPosition;
         private Coroutine _moveCoroutine;
+        private Coroutine _destroyCoroutine;
+        
         public BlockVisualState State => _state;
         public event Action OnAnimationStarted;
         public event Action OnAnimationFinished;
@@ -44,6 +47,19 @@ namespace Core.Board
             OnAnimationStarted?.Invoke();
             _moveCoroutine = StartCoroutine(MoveCoroutine(worldPos));
         }
+
+        public void PlayDestroyAnimation(Action callback = null)
+        {
+            if (_destroyCoroutine != null)
+            {
+                StopCoroutine(_destroyCoroutine);
+                OnAnimationFinished?.Invoke();
+            }
+
+            _state = BlockVisualState.Destroying;
+            OnAnimationStarted?.Invoke();
+            _destroyCoroutine = StartCoroutine(DestroyAnimation(callback));
+        }
         
         private IEnumerator MoveCoroutine(Vector3 targetWorldPos)
         {
@@ -66,11 +82,25 @@ namespace Core.Board
             OnAnimationFinished?.Invoke();
         }
 
+        private IEnumerator DestroyAnimation(Action callback)
+        {
+            transform.localScale = Vector3.one * 0.3f;
+            yield return new WaitForSeconds(_destroyDuration);
+            callback?.Invoke();
+            OnAnimationFinished?.Invoke();
+        }
+
         private void OnDestroy()
         {
             if (_moveCoroutine != null)
             {
                 StopCoroutine(_moveCoroutine);
+                OnAnimationFinished?.Invoke();
+            }
+
+            if (_destroyCoroutine != null)
+            {
+                StopCoroutine(_destroyCoroutine);
                 OnAnimationFinished?.Invoke();
             }
         }
