@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using Configs;
 using Core.Board;
 using Core.Input;
@@ -6,15 +6,18 @@ using UnityEngine;
 
 namespace Core
 {
-    public class GamePlayController : IDisposable
+    public class GamePlayController : MonoBehaviour
     {
-        private readonly LevelsConfig _levelsConfig;
-        private readonly BoardVisual _boardVisual;
-        private readonly InputController _inputController;
+        [Min(0.01f)]
+        [SerializeField] private float _gravityDelay;
+        private LevelsConfig _levelsConfig;
+        private BoardVisual _boardVisual;
+        private InputController _inputController;
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
+        private Coroutine _gravityCoroutine;
         
-        public GamePlayController(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController)
+        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController)
         {
             _levelsConfig = levelsConfig;
             _boardVisual = boardVisual;
@@ -42,20 +45,43 @@ namespace Core
 
         private void OnSwipe(Vector2Int from, Vector2Int to, Vector2Int direction)
         {
-            if (_boardSystem.TryMoveBlock(from, to, direction))
+            if (!_boardSystem.TryMoveBlock(from, to, direction))
             {
-                while (_boardSystem.ApplyGravity())
-                {
-                    // позже здесь будет поиск матчей
-                }
+                return;
             }
+            
+            if (_gravityCoroutine != null)
+            {
+                StopCoroutine(_gravityCoroutine);
+            }
+            
+            _gravityCoroutine = StartCoroutine(GravityWithDelay());
+        }
+        
+        private IEnumerator GravityWithDelay()
+        {
+            yield return new WaitForSeconds(_gravityDelay);
+            
+            while (_boardSystem.ApplyGravity())
+            {
+                yield return null;
+            }
+
+            _gravityCoroutine = null;
         }
 
-        public void Dispose()
+        public void OnDestroy()
         {
+            if (_gravityCoroutine != null)
+            {
+                StopCoroutine(_gravityCoroutine);
+                _gravityCoroutine = null;
+            }
+
             if (_inputController != null)
             {
                 _inputController.OnSwipe -= OnSwipe;
+                _inputController = null;
             }
         }
     }

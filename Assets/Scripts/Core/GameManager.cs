@@ -6,10 +6,10 @@ namespace Core
 {
     public class GameManager : MonoBehaviour
     {
+        [SerializeField] private GamePlayController _gamePlayController;
         [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
         private ResourceProviderService _resourceProviderService;
-        private GamePlayController _gamePlayController;
         
         private void Awake()
         {
@@ -31,17 +31,8 @@ namespace Core
             }
             
             _boardVisual.Init(commonConfigs);
-            _gamePlayController = new GamePlayController(levelsConfig, _boardVisual, _inputController);
+            _gamePlayController.Init(levelsConfig, _boardVisual, _inputController);
             _gamePlayController.StartGame();
-        }
-
-        private void OnDestroy()
-        {
-            if (_gamePlayController != null)
-            {
-                _gamePlayController.Dispose();
-                _gamePlayController = null;
-            }
         }
     }
 }
