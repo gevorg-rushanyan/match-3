@@ -1,3 +1,4 @@
+using System.Collections;
 using Enums;
 using UnityEngine;
 
@@ -5,8 +6,10 @@ namespace Core.Board
 {
     public class BlockVisual : MonoBehaviour
     {
+        [SerializeField] private float _moveDuration = 0.15f;
         private BlockType _type;
         private Vector2Int _gridPosition;
+        private Coroutine _moveCoroutine;
         
         public Vector2Int GridPosition => _gridPosition;
         
@@ -25,10 +28,41 @@ namespace Core.Board
 
         public void MoveTo(Vector3 worldPos)
         {
-            transform.localPosition = worldPos;
+            // transform.localPosition = worldPos;
 
-            // Later
-            // StartCoroutine(MoveCoroutine(worldPos));
+            if (_moveCoroutine != null)
+            {
+                StopCoroutine(_moveCoroutine);
+            }
+
+            _moveCoroutine = StartCoroutine(MoveCoroutine(worldPos));
+        }
+        
+        private IEnumerator MoveCoroutine(Vector3 targetWorldPos)
+        {
+            Vector3 startPos = transform.localPosition;
+            float time = 0f;
+
+            while (time < _moveDuration)
+            {
+                time += Time.deltaTime;
+                float t = time / _moveDuration;
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+                transform.localPosition = Vector3.Lerp(startPos, targetWorldPos, t);
+                yield return null;
+            }
+
+            transform.localPosition = targetWorldPos;
+            _moveCoroutine = null;
+        }
+
+        private void OnDestroy()
+        {
+            if (_moveCoroutine != null)
+            {
+                StopCoroutine(_moveCoroutine);
+            }
         }
     }
 }
