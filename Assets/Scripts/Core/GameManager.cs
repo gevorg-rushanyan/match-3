@@ -9,10 +9,7 @@ namespace Core
         [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
         private ResourceProviderService _resourceProviderService;
-        private BoardModel _boardModel;
-        private BoardSystem _boardSystem;
-
-        public ResourceProviderService ResourceProviderService => _resourceProviderService;
+        private GamePlayController _gamePlayController;
         
         private void Awake()
         {
@@ -26,7 +23,6 @@ namespace Core
             {
                 return;
             }
-            _boardVisual.Init(commonConfigs);
             
             var levelsConfig = _resourceProviderService.GetLevelsConfig();
             if (levelsConfig == null || levelsConfig.Levels.Count == 0)
@@ -34,19 +30,18 @@ namespace Core
                 return;
             }
             
-            var level = levelsConfig.Levels[0];
-            
-            _boardModel = new BoardModel(level.Width, level.Height);
-            foreach (var block in level.Blocks)
+            _boardVisual.Init(commonConfigs);
+            _gamePlayController = new GamePlayController(levelsConfig, _boardVisual, _inputController);
+            _gamePlayController.StartGame();
+        }
+
+        private void OnDestroy()
+        {
+            if (_gamePlayController != null)
             {
-                var data = new BlockData(block.Type);
-                _boardModel.Set(block.Position.x, block.Position.y, data);
+                _gamePlayController.Dispose();
+                _gamePlayController = null;
             }
-            
-            _boardSystem = new BoardSystem(_boardModel, _boardVisual);
-            _boardVisual.CreateBoard(level);
-            
-            _inputController.Init(_boardSystem);
         }
     }
 }

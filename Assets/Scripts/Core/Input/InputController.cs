@@ -1,3 +1,4 @@
+using System;
 using Core.Board;
 using Enums;
 using UnityEngine;
@@ -6,20 +7,18 @@ namespace Core.Input
 {
     public class InputController : MonoBehaviour
     {
-        [SerializeField] private SwipeInput _swipeInput;
         [SerializeField] private Camera _camera;
         [SerializeField] private LayerMask _blockLayer;
+        [SerializeField] private SwipeInput _swipeInput;
 
-        private BoardSystem _boardSystem;
+        public event Action<Vector2Int, Vector2Int, Vector2Int> OnSwipe;
         
         private void Awake()
         {
-            _swipeInput.OnSwipe += HandleSwipe;
-        }
-
-        public void Init(BoardSystem boardSystem)
-        {
-            _boardSystem = boardSystem;
+            if (_swipeInput != null)
+            {
+                _swipeInput.OnSwipe += HandleSwipe;
+            }
         }
 
         private void HandleSwipe(Vector2 screenPos, SwipeDirection swipeDirection)
@@ -34,7 +33,7 @@ namespace Core.Input
             Vector2Int direction = DirectionToOffset(swipeDirection);
             Vector2Int to = from + direction;
 
-            _boardSystem.TryMoveBlock(from, to, direction);
+            OnSwipe?.Invoke(from, to, direction);
         }
 
         private BlockVisual GetBlockUnderScreen(Vector2 screenPos)
@@ -65,7 +64,10 @@ namespace Core.Input
         
         private void OnDestroy()
         {
-            _swipeInput.OnSwipe -= HandleSwipe;
+            if (_swipeInput != null)
+            {
+                _swipeInput.OnSwipe -= HandleSwipe;
+            }
         }
     }
 }

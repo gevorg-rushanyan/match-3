@@ -28,8 +28,8 @@ namespace Core.Board
 
             bool isTargetEmpty = _model.Get(to.x, to.y) == null;
 
-            // Block Move Up if top is empty
-            if (isTargetEmpty && direction == Vector2Int.up)
+            // Block Move Up or Down to empty place 
+            if (isTargetEmpty && (direction == Vector2Int.up || direction == Vector2Int.down))
             {
                 return false;
             }
@@ -56,6 +56,43 @@ namespace Core.Board
             }
 
             return false;
+        }
+
+        public bool ApplyGravity()
+        {
+            bool anyMoved = false;
+
+            for (int x = 0; x < _model.Width; x++)
+            {
+                for (int y = 0; y < _model.Height - 1; y++)
+                {
+                    if (_model.Get(x, y) != null)
+                    {
+                        continue;
+                    }
+                    
+                    int aboveY = y + 1;
+
+                    // Finding block to apply gravity 
+                    while (aboveY < _model.Height && _model.Get(x, aboveY) == null)
+                    {
+                        aboveY++;
+                    }
+
+                    if (aboveY < _model.Height)
+                    {
+                        var block = _model.Get(x, aboveY);
+                        _model.Set(x, y, block);
+                        _model.Remove(x, aboveY);
+                            
+                        _view.MoveVisual(new Vector2Int(x, aboveY), new Vector2Int(x, y));
+
+                        anyMoved = true;
+                    }
+                }
+            }
+
+            return anyMoved;
         }
     }
 }
