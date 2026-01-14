@@ -29,6 +29,11 @@ namespace Core.Input
                 return;
             }
 
+            if (block.State != BlockVisualState.Idle)
+            {
+                return;
+            }
+
             Vector2Int from = block.GridPosition;
             Vector2Int direction = DirectionToOffset(swipeDirection);
             Vector2Int to = from + direction;

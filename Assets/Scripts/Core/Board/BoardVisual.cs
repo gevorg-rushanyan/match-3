@@ -15,8 +15,11 @@ namespace Core.Board
         private int _width; 
         private int _height;
         private bool _isInitialized;
-        
+        private int _activeAnimations;
+        private bool _isAnimating;
         private BlockVisual[,] _visualGrid;
+        
+        public bool IsAnimating => _isAnimating;
 
         public void Init(CommonConfigs commonConfigs)
         {
@@ -58,6 +61,8 @@ namespace Core.Board
                     return;
                 }
                 _visualGrid[blockConfig.Position.x, blockConfig.Position.y] = visual;
+                visual.OnAnimationStarted += AnimationStarted;
+                visual.OnAnimationFinished += AnimationFinished;
             }
 
             float delta = ((1.0f * _width) / 2) * _blockSize.x;
@@ -75,6 +80,12 @@ namespace Core.Board
             
             if (!InBounds(from) || !InBounds(to))
             {
+                return;
+            }
+            
+            if (_visualGrid[to.x, to.y] != null)
+            {
+                Debug.LogError("MoveVisual called but target is not empty, Need to use SwapVisual method");
                 return;
             }
             
@@ -160,6 +171,8 @@ namespace Core.Board
                     var block = _visualGrid[x, y];
                     if (block != null)
                     {
+                        block.OnAnimationStarted -= AnimationStarted;
+                        block.OnAnimationFinished -= AnimationFinished;
                         Destroy(block.gameObject);
                         _visualGrid[x, y] = null;
                     }
@@ -172,6 +185,25 @@ namespace Core.Board
         private bool InBounds(Vector2Int pos)
         {
             return pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
+        }
+        
+        private void AnimationStarted()
+        {
+            _activeAnimations++;
+            if (_activeAnimations == 1)
+            {
+                _isAnimating = true;
+            }
+        }
+        
+        private void AnimationFinished()
+        {
+            _activeAnimations--;
+            if (_activeAnimations <= 0)
+            {
+                _activeAnimations = 0;
+                _isAnimating = false;
+            }
         }
     }
 }

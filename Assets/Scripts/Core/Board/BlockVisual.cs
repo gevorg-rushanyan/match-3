@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Enums;
 using UnityEngine;
@@ -7,14 +8,19 @@ namespace Core.Board
     public class BlockVisual : MonoBehaviour
     {
         [SerializeField] private float _moveDuration = 0.15f;
+        private BlockVisualState _state;
         private BlockType _type;
         private Vector2Int _gridPosition;
         private Coroutine _moveCoroutine;
+        public BlockVisualState State => _state;
+        public event Action OnAnimationStarted;
+        public event Action OnAnimationFinished;
         
         public Vector2Int GridPosition => _gridPosition;
         
         public void Init(BlockType type, Vector2Int gridPosition, Vector3 worldPosition)
         {
+            _state = BlockVisualState.Idle;
             _type = type;
             _gridPosition = gridPosition;
             transform.localPosition = worldPosition;
@@ -29,12 +35,13 @@ namespace Core.Board
         public void MoveTo(Vector3 worldPos)
         {
             // transform.localPosition = worldPos;
-
             if (_moveCoroutine != null)
             {
                 StopCoroutine(_moveCoroutine);
+                OnAnimationFinished?.Invoke();
             }
-
+            _state = BlockVisualState.Moving;
+            OnAnimationStarted?.Invoke();
             _moveCoroutine = StartCoroutine(MoveCoroutine(worldPos));
         }
         
@@ -55,6 +62,8 @@ namespace Core.Board
 
             transform.localPosition = targetWorldPos;
             _moveCoroutine = null;
+            _state = BlockVisualState.Idle;
+            OnAnimationFinished?.Invoke();
         }
 
         private void OnDestroy()
@@ -62,6 +71,7 @@ namespace Core.Board
             if (_moveCoroutine != null)
             {
                 StopCoroutine(_moveCoroutine);
+                OnAnimationFinished?.Invoke();
             }
         }
     }
