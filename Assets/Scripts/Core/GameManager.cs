@@ -1,6 +1,8 @@
+using Configs;
 using Core.Board;
 using Core.Input;
 using Core.Persistence;
+using Core.UI;
 using UnityEngine;
 
 namespace Core
@@ -10,32 +12,52 @@ namespace Core
         [SerializeField] private GamePlayController _gamePlayController;
         [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
+        [SerializeField] private UIManager _uiManager;
         private ResourceProviderService _resourceProviderService;
         private SaveSystem _saveSystem;
-        
-        private void Awake()
-        {
-            _resourceProviderService = new ResourceProviderService();
-        }
+        private CommonConfigs _commonConfigs;
+        private LevelsConfig _levelsConfig;
+        private UIConfigs _uiConfigs;
 
         private void Start()
         {
-            var commonConfigs = _resourceProviderService.GetCommonConfigs();
-            if (commonConfigs == null)
+            _resourceProviderService = new ResourceProviderService();
+            if (!TryLoadConfigs())
             {
                 return;
             }
-            
-            var levelsConfig = _resourceProviderService.GetLevelsConfig();
-            if (levelsConfig == null || levelsConfig.Levels.Count == 0)
-            {
-                return;
-            }
-            
-            _boardVisual.Init(commonConfigs);
+
+            _uiManager.Init(_uiConfigs);
+            _boardVisual.Init(_commonConfigs);
             _saveSystem = new SaveSystem();
-            _gamePlayController.Init(levelsConfig, _boardVisual, _inputController, _saveSystem);
+            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem);
             _gamePlayController.StartGame();
+        }
+
+        private bool TryLoadConfigs()
+        {
+            _commonConfigs = _resourceProviderService.GetCommonConfigs();
+            if (_commonConfigs == null)
+            {
+                Debug.LogError("Common config load FAILED");
+                return false;
+            }
+            
+            _levelsConfig = _resourceProviderService.GetLevelsConfig();
+            if (_levelsConfig == null || _levelsConfig.Levels.Count == 0)
+            {
+                Debug.LogError("Levels config load FAILED");
+                return false;
+            }
+            
+            _uiConfigs = _resourceProviderService.GetUIConfigs();
+            if (_uiConfigs == null || _uiConfigs.Views.Count == 0)
+            {
+                Debug.LogError("UI configs load FAILED");
+                return false;
+            }
+            
+            return true;
         }
     }
 }

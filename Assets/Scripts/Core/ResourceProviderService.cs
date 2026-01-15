@@ -7,9 +7,11 @@ namespace Core
     {
         private const string LevelsConfigPath = "Configs/LevelsConfig";
         private const string CommonConfigPath = "Configs/CommonConfigs";
+        private const string UIConfigsPath = "Configs/UIConfigs";
         
         private LevelsConfig _levelsConfig;
         private CommonConfigs _commonConfig;
+        private UIConfigs _uiConfigs;
         
         public LevelsConfig GetLevelsConfig()
         {
@@ -21,7 +23,6 @@ namespace Core
             var result = Resources.Load<LevelsConfig>(LevelsConfigPath);
             if (result == null)
             {
-                Debug.LogError("Levels config load FAILED");
                 return null;
             }
                 
@@ -40,13 +41,31 @@ namespace Core
             var result = Resources.Load<CommonConfigs>(CommonConfigPath);
             if (result == null)
             {
-                Debug.LogError("Common configs load FAILED");
                 return null;
             }
                 
             _commonConfig = result;
 
             return _commonConfig;
+        }
+
+        public UIConfigs GetUIConfigs()
+        {
+            if (_uiConfigs != null)
+            {
+                return _uiConfigs;
+            }
+            
+            var result = Resources.Load<UIConfigs>(UIConfigsPath);
+            if (result == null)
+            {
+                Debug.LogError("UIConfigs load FAILED");
+                return null;
+            }
+                
+            _uiConfigs = result;
+
+            return _uiConfigs;
         }
     }
 }
