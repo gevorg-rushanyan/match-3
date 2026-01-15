@@ -9,9 +9,9 @@ namespace Core.Board
     {
         [SerializeField] private Transform _blocksContainer;
         
+        private readonly Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new ();
         private Vector2 _blockSize;
         private float _blockZPositionOffset;
-        private Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new ();
         private int _width; 
         private int _height;
         private bool _isInitialized;
@@ -39,36 +39,49 @@ namespace Core.Board
             _isInitialized = true;
         }
 
-        public void CreateBoard(LevelConfig levelConfig)
+        public void CreateBoard(BoardModel model)
         {
             if (!_isInitialized)
             {
-                Debug.LogError($"Cannot create board, not initialized");
+                Debug.LogError("BoardVisual not initialized");
+                return;
+            }
+
+            if (model == null)
+            {
+                Debug.LogError("BoardModel is null");
                 return;
             }
 
             ClearBoard();
-            _width = levelConfig.Width;
-            _height = levelConfig.Height;
+            _width = model.Width;
+            _height = model.Height;
             _visualGrid = new BlockVisual[_width, _height];
 
-            foreach (var blockConfig in levelConfig.Blocks)
+            for (int x = 0; x < _width; x++)
             {
-                var visual = TryCreateBlock(blockConfig);
-                if (visual == null)
+                for (int y = 0; y < _height; y++)
                 {
-                    Debug.LogError("Create block failed");
-                    return;
+                    var blockData = model.Get(x, y);
+                    if (blockData == null)
+                    {
+                        continue;
+                    }
+
+                    var gridPosition = blockData.Position;
+                    var visual = TryCreateBlock(gridPosition, blockData.Type);
+                    if (visual == null)
+                    {
+                        Debug.LogError("Create block failed");
+                        return;
+                    }
+                    _visualGrid[x, y] = visual;
+                    visual.OnAnimationStarted += AnimationStarted;
+                    visual.OnAnimationFinished += AnimationFinished;
                 }
-                _visualGrid[blockConfig.Position.x, blockConfig.Position.y] = visual;
-                visual.OnAnimationStarted += AnimationStarted;
-                visual.OnAnimationFinished += AnimationFinished;
             }
 
-            float delta = ((1.0f * _width) / 2) * _blockSize.x;
-            var position = _blocksContainer.position;
-            position.x = -delta;
-            _blocksContainer.position = position; 
+            CenterBoardHorizontally();
         }
 
         public void MoveVisual(Vector2Int from, Vector2Int to)
@@ -99,7 +112,7 @@ namespace Core.Board
             _visualGrid[to.x, to.y] = block;
             
             block.SetGridPosition(to);
-            block.MoveTo(BlockPosition(to.x, to.y));
+            block.MoveTo(GridToWorldPosition(to.x, to.y));
         }
         
         public void SwapVisual(Vector2Int a, Vector2Int b)
@@ -128,8 +141,8 @@ namespace Core.Board
             blockA.SetGridPosition(b);
             blockB.SetGridPosition(a);
 
-            blockA.MoveTo(BlockPosition(b.x, b.y));
-            blockB.MoveTo(BlockPosition(a.x, a.y));
+            blockA.MoveTo(GridToWorldPosition(b.x, b.y));
+            blockB.MoveTo(GridToWorldPosition(a.x, a.y));
         }
         
         public void DestroyVisual(Vector2Int pos)
@@ -147,11 +160,11 @@ namespace Core.Board
             });
         }
 
-        private BlockVisual TryCreateBlock(BlockConfig blockConfig)
+        private BlockVisual TryCreateBlock(Vector2Int position, BlockType blockType)
         {
-            var position = BlockPosition(blockConfig.Position.x, blockConfig.Position.y);
+            var worldPosition = GridToWorldPosition(position.x, position.y);
 
-            if (!_blockVisualConfigs.TryGetValue(blockConfig.Type, out var visualConfig))
+            if (!_blockVisualConfigs.TryGetValue(blockType, out var visualConfig))
             {
                 return null;
             }
@@ -162,14 +175,16 @@ namespace Core.Board
             }
 
             BlockVisual blockVisual = Instantiate(visualConfig.Prefab, _blocksContainer);
-            blockVisual.Init(blockConfig.Type, blockConfig.Position, position);
+            blockVisual.Init(blockType, position, worldPosition);
             return blockVisual;
         }
         
-        // TODO rename to GridToWordldPosition
-        private Vector3 BlockPosition(int x, int y)
+        private Vector3 GridToWorldPosition(int x, int y)
         {
-            return new Vector3(x * _blockSize.x, y * _blockSize.y, x * _blockZPositionOffset + y * _blockZPositionOffset);
+            return new Vector3(
+                x * _blockSize.x,
+                y * _blockSize.y,
+                x * _blockZPositionOffset + y * _blockZPositionOffset);
         }
         
         private void ClearBoard()
@@ -195,6 +210,14 @@ namespace Core.Board
             }
 
             _visualGrid = null;
+        }
+        
+        private void CenterBoardHorizontally()
+        {
+            float delta = (_width * _blockSize.x) / 2f;
+            var position = _blocksContainer.position;
+            position.x = -delta;
+            _blocksContainer.position = position;
         }
         
         private bool InBounds(Vector2Int pos)

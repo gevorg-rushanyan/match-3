@@ -1,5 +1,6 @@
 using Core.Board;
 using Core.Input;
+using Core.Persistence;
 using UnityEngine;
 
 namespace Core
@@ -10,6 +11,7 @@ namespace Core
         [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
         private ResourceProviderService _resourceProviderService;
+        private SaveSystem _saveSystem;
         
         private void Awake()
         {
@@ -31,7 +33,8 @@ namespace Core
             }
             
             _boardVisual.Init(commonConfigs);
-            _gamePlayController.Init(levelsConfig, _boardVisual, _inputController);
+            _saveSystem = new SaveSystem();
+            _gamePlayController.Init(levelsConfig, _boardVisual, _inputController, _saveSystem);
             _gamePlayController.StartGame();
         }
     }

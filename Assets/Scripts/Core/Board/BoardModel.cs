@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Persistence;
 using Enums;
 using UnityEngine;
 
@@ -160,6 +161,26 @@ namespace Core.Board
             }
 
             return result;
+        }
+        
+        public BoardSaveData ToSaveData()
+        {
+            List<BlockSaveData> blocks = new List<BlockSaveData>();
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    var block = Get(x, y);
+                    if (block == null)
+                    {
+                        continue;
+                    }
+
+                    blocks.Add(new BlockSaveData(x, y, block.Type));
+                }
+            }
+
+            return new BoardSaveData(_width, _height, blocks);
         }
     }
 }
