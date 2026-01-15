@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Configs;
 using Core.Board;
 using Core.Input;
 using Core.Persistence;
+using Core.UI;
+using Enums;
 using UnityEngine;
 
 namespace Core
@@ -20,25 +23,38 @@ namespace Core
         private Coroutine _normalizeCoroutine;
         private Coroutine _nextLevelCoroutine;
         private SaveSystem _saveSystem;
+        private UIManager _uiManager;
         private bool _isBoardChanged;
         private int _level;
         
-        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem)
+        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem, UIManager uiManager)
         {
             _levelsConfig = levelsConfig;
             _boardVisual = boardVisual;
             _inputController = inputController;
             _saveSystem = saveSystem;
+            _uiManager = uiManager;
+            
             if (inputController != null)
             {
                 _inputController.OnSwipe += OnSwipe;
             }
+            
+            if (_uiManager != null)
+            {
+                _uiManager.PlaySelected += OnPlaySelected;
+            }
+            
+            _uiManager.Show(UIViewType.Main);
         }
 
-        public void StartGame()
+        private void StartGame()
         {
             var save = _saveSystem.Load();
-
+            
+            
+            
+            
             if (save != null)
             {
                 _level = save.currentLevelIndex;
@@ -49,6 +65,15 @@ namespace Core
                 _level = 0;
                 StartNewGame(_level);
             }
+        }
+
+        private void LoadLevel()
+        {
+        }
+
+        private void OnPlaySelected()
+        {
+            StartGame();
         }
 
         private void StartNewGame(int levelIndex)
@@ -185,6 +210,12 @@ namespace Core
             {
                 _inputController.OnSwipe -= OnSwipe;
                 _inputController = null;
+            }
+            
+            if (_uiManager != null)
+            {
+                _uiManager.PlaySelected -= OnPlaySelected;
+                _uiManager = null;
             }
         }
     }

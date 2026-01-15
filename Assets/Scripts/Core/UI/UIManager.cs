@@ -10,6 +10,7 @@ namespace Core.UI
     {
         [SerializeField] private Transform _root;
         private Dictionary<UIViewType, UIView> _windows = new ();
+        private int _level;
         private UIView _current;
         
         public event Action PlaySelected;
@@ -38,6 +39,7 @@ namespace Core.UI
 
             if (type == UIViewType.Main && _current is MainView main)
             {
+                main.SetLevel(1);
                 main.PlaySelected += OnPlaySelected;
             }
         }

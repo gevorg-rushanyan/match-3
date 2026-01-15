@@ -30,8 +30,7 @@ namespace Core
             _uiManager.Init(_uiConfigs);
             _boardVisual.Init(_commonConfigs);
             _saveSystem = new SaveSystem();
-            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem);
-            _gamePlayController.StartGame();
+            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem, _uiManager);
         }
 
         private bool TryLoadConfigs()
