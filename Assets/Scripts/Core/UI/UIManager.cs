@@ -16,6 +16,8 @@ namespace Core.UI
         private UIView _current;
         
         public event Action PlaySelected;
+        public event Action NextLevelSelected;
+        public event Action RestartSelected;
 
         public void Init(UIConfigs configs, GameStats gameStats)
         {
@@ -45,11 +47,27 @@ namespace Core.UI
                 main.Init(_gameStats);
                 main.PlaySelected += OnPlaySelected;
             }
+            
+            if (type == UIViewType.Gameplay && _current is GameplayView gameplay)
+            {
+                gameplay.NextLevelSelected += OnNextLevelSelected;
+                gameplay.RestartSelected += OnRestartSelected;
+            }
         }
 
         private void OnPlaySelected()
         {
             PlaySelected?.Invoke();
+        }
+
+        private void OnNextLevelSelected()
+        {
+            NextLevelSelected?.Invoke();
+        }
+
+        private void OnRestartSelected()
+        {
+            RestartSelected?.Invoke();
         }
     }
 }

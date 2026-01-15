@@ -17,8 +17,7 @@ namespace Core.UI
         {
             _playButton.onClick.AddListener(() =>
             {
-                // TMP
-                gameObject.SetActive(false);
+                _playButton.interactable = false;
                 PlaySelected?.Invoke();
             });
         }

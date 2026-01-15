@@ -43,6 +43,8 @@ namespace Core
             if (_uiManager != null)
             {
                 _uiManager.PlaySelected += OnPlaySelected;
+                _uiManager.NextLevelSelected += OnNextLevelSelected;
+                _uiManager.RestartSelected += OnRestartSelected;
             }
         }
 
@@ -55,6 +57,7 @@ namespace Core
 
         private void OnPlaySelected()
         {
+            _uiManager.Show(UIViewType.Gameplay);
             if (_gameSaveData != null)
             {
                 LoadFromSave(_gameSaveData);
@@ -64,6 +67,15 @@ namespace Core
             {
                 StartNewGame(_gameStats.Level);
             }
+        }
+
+        private void OnNextLevelSelected()
+        {
+            
+        }
+
+        private void OnRestartSelected()
+        {
         }
 
         private void StartNewGame(int levelIndex)
@@ -205,6 +217,8 @@ namespace Core
             if (_uiManager != null)
             {
                 _uiManager.PlaySelected -= OnPlaySelected;
+                _uiManager.NextLevelSelected -= OnNextLevelSelected;
+                _uiManager.RestartSelected -= OnRestartSelected;
                 _uiManager = null;
             }
         }
