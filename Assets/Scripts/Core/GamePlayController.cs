@@ -19,7 +19,7 @@ namespace Core
         private BoardSystem _boardSystem;
         private Coroutine _normalizeCoroutine;
         private SaveSystem _saveSystem;
-        private bool _isBordChanged;
+        private bool _isBoardChanged;
         private int _level;
         
         public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem)
@@ -45,48 +45,30 @@ namespace Core
             }
             else
             {
-                var level = _levelsConfig.Levels[0];
-                _boardModel = new BoardModel(level.Width, level.Height);
-                foreach (var block in level.Blocks)
-                {
-                    var data = new BlockData(block.Type);
-                    _boardModel.Set(block.Position.x, block.Position.y, data);
-                }
+                var config = _levelsConfig.Levels[0];
+                _boardModel = BoardModelFactory.CreateFromConfig(config);
                 _boardSystem = new BoardSystem(_boardModel, _boardVisual);
                 _boardVisual.CreateBoard(_boardModel);
-                _isBordChanged = true;
+                _isBoardChanged = true;
             }
         }
 
         private void LoadFromSave(GameSaveData save)
         {
             var boardData = save.board;
-            _boardModel = CreateBoardModelFromSave(boardData.width, boardData.height, boardData.blocks);
+            _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
             _boardSystem = new BoardSystem(_boardModel, _boardVisual);
             _boardVisual.CreateBoard(_boardModel);
-        }
-
-        private BoardModel CreateBoardModelFromSave(int width, int height, IReadOnlyList<BlockSaveData> blocks)
-        {
-            var boardModel = new BoardModel(width, height);
-            foreach (var block in blocks)
-            {
-                var data = new BlockData(block.type);
-                boardModel.Set(block.x, block.y, data);
-            }
-            
-            return boardModel;
         }
 
         private void OnSwipe(Vector2Int from, Vector2Int to, Vector2Int direction)
         {
             if (!_boardSystem.TryMoveBlock(from, to, direction))
             {
-                _isBordChanged = true;
                 return;
             }
             
-            _isBordChanged = true;
+            _isBoardChanged = true;
             if (_normalizeCoroutine != null)
             {
                 StopCoroutine(_normalizeCoroutine);
@@ -103,7 +85,7 @@ namespace Core
             {
                 while (_boardSystem.ApplyGravity())
                 {
-                    _isBordChanged = true;
+                    _isBoardChanged = true;
                     yield return new WaitForSeconds(_gravityDelay);
                 }
                 
@@ -114,7 +96,7 @@ namespace Core
                 }
                 
                 _boardSystem.DestroyBlocks(matchBlocks);
-                _isBordChanged = true;
+                _isBoardChanged = true;
                 yield return new WaitForSeconds(_gravityDelay);
             }
             
@@ -122,7 +104,7 @@ namespace Core
         
         private bool TrySaveProgress()
         {
-            if (!_isBordChanged)
+            if (!_isBoardChanged)
             {
                 return false;
             }
@@ -130,7 +112,7 @@ namespace Core
             var boardSaveData = _boardModel.ToSaveData();
             var gameSaveData = new GameSaveData(boardSaveData, _level);
             _saveSystem.Save(gameSaveData);
-            _isBordChanged = false;
+            _isBoardChanged = false;
 
             return true;
         }
