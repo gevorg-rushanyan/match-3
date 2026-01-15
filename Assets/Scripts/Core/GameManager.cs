@@ -15,6 +15,7 @@ namespace Core
         [SerializeField] private UIManager _uiManager;
         private ResourceProviderService _resourceProviderService;
         private SaveSystem _saveSystem;
+        private GameStats _gameStats;
         private CommonConfigs _commonConfigs;
         private LevelsConfig _levelsConfig;
         private UIConfigs _uiConfigs;
@@ -27,10 +28,14 @@ namespace Core
                 return;
             }
 
-            _uiManager.Init(_uiConfigs);
+
+            _gameStats = new GameStats();
+            _uiManager.Init(_uiConfigs, _gameStats);
             _boardVisual.Init(_commonConfigs);
             _saveSystem = new SaveSystem();
-            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem, _uiManager);
+            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem, _uiManager, _gameStats);
+            
+            _gamePlayController.StartGame();
         }
 
         private bool TryLoadConfigs()

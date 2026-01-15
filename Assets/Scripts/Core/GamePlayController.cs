@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using Configs;
 using Core.Board;
 using Core.Input;
@@ -24,16 +22,18 @@ namespace Core
         private Coroutine _nextLevelCoroutine;
         private SaveSystem _saveSystem;
         private UIManager _uiManager;
+        private GameStats _gameStats;
         private bool _isBoardChanged;
-        private int _level;
+        private GameSaveData _gameSaveData;
         
-        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem, UIManager uiManager)
+        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem, UIManager uiManager, GameStats gameStats)
         {
             _levelsConfig = levelsConfig;
             _boardVisual = boardVisual;
             _inputController = inputController;
             _saveSystem = saveSystem;
             _uiManager = uiManager;
+            _gameStats = gameStats;
             
             if (inputController != null)
             {
@@ -44,36 +44,26 @@ namespace Core
             {
                 _uiManager.PlaySelected += OnPlaySelected;
             }
-            
+        }
+
+        public void StartGame()
+        {
+            _gameSaveData = _saveSystem.Load();
+            _gameStats.SetLevel(_gameSaveData != null ? _gameSaveData.currentLevelIndex : 0);
             _uiManager.Show(UIViewType.Main);
-        }
-
-        private void StartGame()
-        {
-            var save = _saveSystem.Load();
-            
-            
-            
-            
-            if (save != null)
-            {
-                _level = save.currentLevelIndex;
-                LoadFromSave(save);
-            }
-            else
-            {
-                _level = 0;
-                StartNewGame(_level);
-            }
-        }
-
-        private void LoadLevel()
-        {
         }
 
         private void OnPlaySelected()
         {
-            StartGame();
+            if (_gameSaveData != null)
+            {
+                LoadFromSave(_gameSaveData);
+                _gameSaveData = null;
+            }
+            else
+            {
+                StartNewGame(_gameStats.Level);
+            }
         }
 
         private void StartNewGame(int levelIndex)
@@ -94,7 +84,7 @@ namespace Core
             var boardData = save.board;
             if (boardData == null)
             {
-                StartNewGame(_level);
+                StartNewGame(_gameStats.Level);
                 return;
             }
             
@@ -151,7 +141,7 @@ namespace Core
         private void OnLevelCompleted()
         {
             Debug.Log("LEVEL COMPLETED!");
-            _level++;
+            _gameStats.NextLevel();
             _isBoardChanged = true;
             TrySaveProgress();
             _nextLevelCoroutine = StartCoroutine(StartNextLevel());
@@ -160,7 +150,7 @@ namespace Core
         private IEnumerator StartNextLevel()
         {
             yield return new WaitForSeconds(1);
-            StartNewGame(_level);
+            StartNewGame(_gameStats.Level);
             _nextLevelCoroutine = null;
         }
 
@@ -172,7 +162,7 @@ namespace Core
             }
             
             var boardSaveData = _boardModel.ToSaveData();
-            var gameSaveData = new GameSaveData(_level, boardSaveData);
+            var gameSaveData = new GameSaveData(_gameStats.Level, boardSaveData);
             _saveSystem.Save(gameSaveData);
             _isBoardChanged = false;
 
