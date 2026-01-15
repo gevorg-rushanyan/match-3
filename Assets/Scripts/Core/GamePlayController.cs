@@ -18,6 +18,7 @@ namespace Core
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
         private Coroutine _normalizeCoroutine;
+        private Coroutine _nextLevelCoroutine;
         private SaveSystem _saveSystem;
         private bool _isBoardChanged;
         private int _level;
@@ -45,17 +46,33 @@ namespace Core
             }
             else
             {
-                var config = _levelsConfig.Levels[0];
-                _boardModel = BoardModelFactory.CreateFromConfig(config);
-                _boardSystem = new BoardSystem(_boardModel, _boardVisual);
-                _boardVisual.CreateBoard(_boardModel);
-                _isBoardChanged = true;
+                _level = 0;
+                StartNewGame(_level);
             }
         }
 
+        private void StartNewGame(int levelIndex)
+        {
+            if (levelIndex > _levelsConfig.Levels.Count - 1)
+            {
+                levelIndex = levelIndex / _levelsConfig.Levels.Count;
+            }
+            var config = _levelsConfig.Levels[levelIndex];
+            _boardModel = BoardModelFactory.CreateFromConfig(config);
+            _boardSystem = new BoardSystem(_boardModel, _boardVisual);
+            _boardVisual.CreateBoard(_boardModel);
+            _isBoardChanged = true;
+        }
+        
         private void LoadFromSave(GameSaveData save)
         {
             var boardData = save.board;
+            if (boardData == null)
+            {
+                StartNewGame(_level);
+                return;
+            }
+            
             _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
             _boardSystem = new BoardSystem(_boardModel, _boardVisual);
             _boardVisual.CreateBoard(_boardModel);
@@ -100,17 +117,37 @@ namespace Core
                 yield return new WaitForSeconds(_gravityDelay);
             }
             
+            if (_boardSystem.IsLevelCompleted())
+            {
+                OnLevelCompleted();
+            }
         }
-        
+
+        private void OnLevelCompleted()
+        {
+            Debug.Log("LEVEL COMPLETED!");
+            _level++;
+            _isBoardChanged = true;
+            TrySaveProgress();
+            _nextLevelCoroutine = StartCoroutine(StartNextLevel());
+        }
+
+        private IEnumerator StartNextLevel()
+        {
+            yield return new WaitForSeconds(1);
+            StartNewGame(_level);
+            _nextLevelCoroutine = null;
+        }
+
         private bool TrySaveProgress()
         {
             if (!_isBoardChanged)
             {
                 return false;
             }
-
+            
             var boardSaveData = _boardModel.ToSaveData();
-            var gameSaveData = new GameSaveData(boardSaveData, _level);
+            var gameSaveData = new GameSaveData(_level, boardSaveData);
             _saveSystem.Save(gameSaveData);
             _isBoardChanged = false;
 
@@ -136,6 +173,12 @@ namespace Core
             {
                 StopCoroutine(_normalizeCoroutine);
                 _normalizeCoroutine = null;
+            }
+
+            if (_nextLevelCoroutine != null)
+            {
+                StopCoroutine(_nextLevelCoroutine);
+                _nextLevelCoroutine = null;
             }
 
             if (_inputController != null)

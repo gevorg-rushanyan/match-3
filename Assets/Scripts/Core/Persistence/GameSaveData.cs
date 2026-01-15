@@ -8,7 +8,7 @@ namespace Core.Persistence
         public int currentLevelIndex;
         public BoardSaveData board;
 
-        public GameSaveData(BoardSaveData board, int currentLevelIndex)
+        public GameSaveData(int currentLevelIndex, BoardSaveData board)
         {
             this.board = board;
             this.currentLevelIndex = currentLevelIndex;

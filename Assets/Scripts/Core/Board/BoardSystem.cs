@@ -161,5 +161,10 @@ namespace Core.Board
 
             return true;
         }
+        
+        public bool IsLevelCompleted()
+        {
+            return _model.IsEmpty;
+        }
     }
 }

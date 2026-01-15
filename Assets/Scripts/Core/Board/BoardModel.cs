@@ -10,9 +10,11 @@ namespace Core.Board
         private int _width;
         private int _height;
         private BlockData[,] _grid;
+        private int _blockCount;
         
         public int Width => _width;
         public int Height => _height;
+        public bool IsEmpty => _blockCount == 0;
 
         public BoardModel(int width, int height)
         {
@@ -32,6 +34,15 @@ namespace Core.Board
 
         public void Set(int x, int y, BlockData block)
         {
+            if (_grid[x, y] == null && block != null)
+            {
+                _blockCount++;
+            }
+            else if (_grid[x, y] != null && block == null)
+            {
+                _blockCount--;
+            }
+
             _grid[x, y] = block;
             if (block != null)
             {
@@ -45,17 +56,17 @@ namespace Core.Board
             {
                 return;
             }
-            _grid[x, y] = null;
+            
+            if (_grid[x, y] != null)
+            {
+                _grid[x, y] = null;
+                _blockCount--;
+            }
         }
 
         public bool InBounds(int x, int y)
         {
             return x >= 0 && x < _width && y >= 0 && y < _height;
-        }
-        
-        public bool IsEmpty(int x, int y)
-        {
-            return InBounds(x, y) && _grid[x, y] == null;
         }
         
         public HashSet<Vector2Int> FindConnectedBlocks(Vector2Int start)
@@ -165,6 +176,11 @@ namespace Core.Board
         
         public BoardSaveData ToSaveData()
         {
+            if (_blockCount == 0)
+            {
+                return null;
+            }
+
             List<BlockSaveData> blocks = new List<BlockSaveData>();
             for (int x = 0; x < Width; x++)
             {
