@@ -96,16 +96,20 @@ namespace Core.Board
             return anyMoved;
         }
         
-        public List<List<Vector2Int>> FindDestroyAreas()
+        public HashSet<Vector2Int> FindAndDestroyMatches()
         {
-            var result = new List<List<Vector2Int>>();
-            var visited = new bool[_model.Width, _model.Height];
+            var result = new HashSet<Vector2Int>();
+            var visited = new bool[_model.Width][];
+            for (int index = 0; index < _model.Width; index++)
+            {
+                visited[index] = new bool[_model.Height];
+            }
 
             for (int x = 0; x < _model.Width; x++)
             {
                 for (int y = 0; y < _model.Height; y++)
                 {
-                    if (visited[x, y])
+                    if (visited[x][y])
                     {
                         continue;
                     }
@@ -116,20 +120,25 @@ namespace Core.Board
                         continue;
                     }
 
-                    var area = _model.GetConnectedArea(new Vector2Int(x, y));
-                    if (area == null || area.Count == 0)
+                    var connectedBlocks = _model.GetConnectedBlocks(new Vector2Int(x, y));
+                    if (connectedBlocks == null || connectedBlocks.Count == 0)
                     {
                         continue;
                     }
 
-                    foreach (var p in area)
+                    foreach (var p in connectedBlocks)
                     {
-                        visited[p.x, p.y] = true;
+                        visited[p.x][p.y] = true;
                     }
-
-                    if (_model.HasMatchLine(area))
+                    
+                    // TODO MinCount 3 move to configs
+                    var matches = _model.GetMatches(connectedBlocks, 3);
+                    if (matches != null && matches.Count > 0)
                     {
-                        result.Add(area);
+                        foreach (var point in matches)
+                        {
+                            result.Add(point);
+                        }
                     }
                 }
             }
@@ -137,18 +146,17 @@ namespace Core.Board
             return result;
         }
         
-        public bool DestroyAreas(List<List<Vector2Int>> areas)
+        public bool DestroyBlocks(HashSet<Vector2Int> blocks)
         {
-            if (areas == null || areas.Count == 0)
-                return false;
-
-            foreach (var area in areas)
+            if (blocks == null || blocks.Count == 0)
             {
-                foreach (var pos in area)
-                {
-                    _model.Remove(pos.x, pos.y);
-                    _view.DestroyVisual(pos);
-                }
+                return false;
+            }
+
+            foreach (var area in blocks)
+            {
+                _model.Remove(area.x, area.y);
+                _view.DestroyVisual(area);
             }
 
             return true;

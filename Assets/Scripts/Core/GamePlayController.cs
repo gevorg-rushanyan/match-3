@@ -15,7 +15,7 @@ namespace Core
         private InputController _inputController;
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
-        private Coroutine _gravityCoroutine;
+        private Coroutine _normalizeCoroutine;
         
         public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController)
         {
@@ -50,13 +50,12 @@ namespace Core
                 return;
             }
             
-            if (_gravityCoroutine != null)
+            if (_normalizeCoroutine != null)
             {
-                StopCoroutine(_gravityCoroutine);
+                StopCoroutine(_normalizeCoroutine);
             }
             
-            // _gravityCoroutine = StartCoroutine(GravityWithDelay());
-            _gravityCoroutine = StartCoroutine(Normalize());
+            _normalizeCoroutine = StartCoroutine(Normalize());
         }
         
         private IEnumerator Normalize()
@@ -65,45 +64,28 @@ namespace Core
 
             while (true)
             {
-                // 1️⃣ гравитация
                 while (_boardSystem.ApplyGravity())
                 {
-                    yield return new WaitForSeconds(0.2f);
+                    yield return new WaitForSeconds(_gravityDelay);
                 }
-
-                // 2️⃣ поиск матчей
-                var areas = _boardSystem.FindDestroyAreas();
-                if (areas.Count == 0)
+                
+                var matchBlocks = _boardSystem.FindAndDestroyMatches();
+                if (matchBlocks.Count == 0)
                 {
                     break;
                 }
-
-                // 3️⃣ уничтожение
-                _boardSystem.DestroyAreas(areas);
-
-                // 4️⃣ пауза перед следующей гравитацией
+                
+                _boardSystem.DestroyBlocks(matchBlocks);
                 yield return new WaitForSeconds(_gravityDelay);
             }
-        }
-        
-        private IEnumerator GravityWithDelay()
-        {
-            yield return new WaitForSeconds(_gravityDelay);
-            
-            while (_boardSystem.ApplyGravity())
-            {
-                yield return null;
-            }
-
-            _gravityCoroutine = null;
         }
 
         public void OnDestroy()
         {
-            if (_gravityCoroutine != null)
+            if (_normalizeCoroutine != null)
             {
-                StopCoroutine(_gravityCoroutine);
-                _gravityCoroutine = null;
+                StopCoroutine(_normalizeCoroutine);
+                _normalizeCoroutine = null;
             }
 
             if (_inputController != null)

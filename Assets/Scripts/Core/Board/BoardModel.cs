@@ -58,7 +58,7 @@ namespace Core.Board
             return InBounds(x, y) && _grid[x, y] == null;
         }
         
-        public List<Vector2Int> GetConnectedArea(Vector2Int start)
+        public HashSet<Vector2Int> GetConnectedBlocks(Vector2Int start)
         {
             var startBlock = Get(start.x, start.y);
             if (startBlock == null)
@@ -67,9 +67,14 @@ namespace Core.Board
             }
 
             BlockType type = startBlock.Type;
-            var result = new List<Vector2Int>();
+            var result = new HashSet<Vector2Int>();
             var stack = new Stack<Vector2Int>();
-            var visited = new bool[Width, Height];
+            var visited = new bool[Width][];
+            for (int index = 0; index < Width; index++)
+            {
+                visited[index] = new bool[Height];
+            }
+
             stack.Push(start);
 
             while (stack.Count > 0)
@@ -81,7 +86,7 @@ namespace Core.Board
                     continue;
                 }
 
-                if (visited[pos.x, pos.y])
+                if (visited[pos.x][pos.y])
                 {
                     continue;
                 }
@@ -92,7 +97,7 @@ namespace Core.Board
                     continue;
                 }
 
-                visited[pos.x, pos.y] = true;
+                visited[pos.x][pos.y] = true;
                 result.Add(pos);
 
                 stack.Push(pos + Vector2Int.up);
@@ -104,53 +109,58 @@ namespace Core.Board
             return result;
         }
         
-        public bool HasMatchLine(List<Vector2Int> area)
+        public HashSet<Vector2Int> GetMatches(HashSet<Vector2Int> connectedBlocks, int minCount)
         {
-            // группируем по Y → горизонтали
-            var byRow = area.GroupBy(p => p.y);
-            foreach (var row in byRow)
+            var result = new HashSet<Vector2Int>();
+
+            foreach (var block in connectedBlocks)
             {
-                if (HasConsecutive(row.Select(p => p.x)))
+                // Horizontal
+                int hCount = 1;
+
+                var left = block + Vector2Int.left;
+                while (connectedBlocks.Contains(left))
                 {
-                    return true;
+                    hCount++;
+                    left += Vector2Int.left;
+                }
+
+                var right = block + Vector2Int.right;
+                while (connectedBlocks.Contains(right))
+                {
+                    hCount++;
+                    right += Vector2Int.right;
+                }
+
+                if (hCount >= minCount)
+                {
+                    result.Add(block);
+                }
+
+                // Vertical
+                int vCount = 1;
+
+                var down = block + Vector2Int.down;
+                while (connectedBlocks.Contains(down))
+                {
+                    vCount++;
+                    down += Vector2Int.down;
+                }
+
+                var up = block + Vector2Int.up;
+                while (connectedBlocks.Contains(up))
+                {
+                    vCount++;
+                    up += Vector2Int.up;
+                }
+
+                if (vCount >= minCount)
+                {
+                    result.Add(block);
                 }
             }
 
-            // группируем по X → вертикали
-            var byColumn = area.GroupBy(p => p.x);
-            foreach (var col in byColumn)
-            {
-                if (HasConsecutive(col.Select(p => p.y)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        
-        private bool HasConsecutive(IEnumerable<int> values)
-        {
-            var ordered = values.OrderBy(v => v).ToList();
-
-            int count = 1;
-            for (int i = 1; i < ordered.Count; i++)
-            {
-                if (ordered[i] == ordered[i - 1] + 1)
-                {
-                    count++;
-                    if (count >= 3)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    count = 1;
-                }
-            }
-
-            return false;
+            return result;
         }
     }
 }
