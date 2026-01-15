@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Enums;
 using UnityEngine;
 
@@ -58,7 +57,7 @@ namespace Core.Board
             return InBounds(x, y) && _grid[x, y] == null;
         }
         
-        public HashSet<Vector2Int> GetConnectedBlocks(Vector2Int start)
+        public HashSet<Vector2Int> FindConnectedBlocks(Vector2Int start)
         {
             var startBlock = Get(start.x, start.y);
             if (startBlock == null)
@@ -109,7 +108,7 @@ namespace Core.Board
             return result;
         }
         
-        public HashSet<Vector2Int> GetMatches(HashSet<Vector2Int> connectedBlocks, int minCount)
+        public HashSet<Vector2Int> FindMatches(HashSet<Vector2Int> connectedBlocks, int minCount)
         {
             var result = new HashSet<Vector2Int>();
 

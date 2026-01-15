@@ -69,7 +69,7 @@ namespace Core
                     yield return new WaitForSeconds(_gravityDelay);
                 }
                 
-                var matchBlocks = _boardSystem.FindAndDestroyMatches();
+                var matchBlocks = _boardSystem.FindMatches();
                 if (matchBlocks.Count == 0)
                 {
                     break;

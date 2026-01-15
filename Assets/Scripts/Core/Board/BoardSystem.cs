@@ -96,7 +96,7 @@ namespace Core.Board
             return anyMoved;
         }
         
-        public HashSet<Vector2Int> FindAndDestroyMatches()
+        public HashSet<Vector2Int> FindMatches()
         {
             var result = new HashSet<Vector2Int>();
             var visited = new bool[_model.Width][];
@@ -120,7 +120,7 @@ namespace Core.Board
                         continue;
                     }
 
-                    var connectedBlocks = _model.GetConnectedBlocks(new Vector2Int(x, y));
+                    var connectedBlocks = _model.FindConnectedBlocks(new Vector2Int(x, y));
                     if (connectedBlocks == null || connectedBlocks.Count == 0)
                     {
                         continue;
@@ -132,7 +132,7 @@ namespace Core.Board
                     }
                     
                     // TODO MinCount 3 move to configs
-                    var matches = _model.GetMatches(connectedBlocks, 3);
+                    var matches = _model.FindMatches(connectedBlocks, 3);
                     if (matches != null && matches.Count > 0)
                     {
                         foreach (var point in matches)
