@@ -13,6 +13,7 @@ namespace Core
         [SerializeField] private InputController _inputController;
         [SerializeField] private BoardVisual _boardVisual;
         [SerializeField] private UIManager _uiManager;
+        [SerializeField] private CameraController _cameraController;
         private ResourceProviderService _resourceProviderService;
         private SaveSystem _saveSystem;
         private GameStats _gameStats;
@@ -27,8 +28,8 @@ namespace Core
             {
                 return;
             }
-
-
+            
+            _cameraController.Init(_gamePlayController, _commonConfigs);
             _gameStats = new GameStats();
             _uiManager.Init(_uiConfigs, _gameStats);
             _boardVisual.Init(_commonConfigs);

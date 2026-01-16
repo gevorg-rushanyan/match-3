@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Configs;
 using Core.Board;
@@ -14,20 +15,31 @@ namespace Core
         [Min(0.01f)]
         [SerializeField] private float _gravityDelay;
         [SerializeField] private float _winViewDuration;
+        // Dependencies
         private LevelsConfig _levelsConfig;
         private BoardVisual _boardVisual;
         private InputController _inputController;
+        private SaveSystem _saveSystem;
+        private UIManager _uiManager;
+        private GameStats _gameStats;
+        private CameraController _cameraController;
+        
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
         private Coroutine _normalizeCoroutine;
         private Coroutine _nextLevelCoroutine;
-        private SaveSystem _saveSystem;
-        private UIManager _uiManager;
-        private GameStats _gameStats;
         private bool _isBoardChanged;
         private GameSaveData _gameSaveData;
         
-        public void Init(LevelsConfig levelsConfig, BoardVisual boardVisual, InputController inputController, SaveSystem saveSystem, UIManager uiManager, GameStats gameStats)
+        public event Action<Vector2Int> BoardSizeChanged; 
+        
+        public void Init(
+            LevelsConfig levelsConfig,
+            BoardVisual boardVisual,
+            InputController inputController,
+            SaveSystem saveSystem,
+            UIManager uiManager,
+            GameStats gameStats)
         {
             _levelsConfig = levelsConfig;
             _boardVisual = boardVisual;
@@ -94,6 +106,7 @@ namespace Core
             _boardSystem = new BoardSystem(_boardModel, _boardVisual);
             _boardVisual.CreateBoard(_boardModel);
             _isBoardChanged = true;
+            TriggerBordSizeChangedEvent();
         }
         
         private void LoadFromSave(GameSaveData save)
@@ -108,6 +121,7 @@ namespace Core
             _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
             _boardSystem = new BoardSystem(_boardModel, _boardVisual);
             _boardVisual.CreateBoard(_boardModel);
+            TriggerBordSizeChangedEvent();
         }
 
         private void OnSwipe(Vector2Int from, Vector2Int to, Vector2Int direction)
@@ -185,6 +199,11 @@ namespace Core
             _isBoardChanged = false;
 
             return true;
+        }
+
+        private void TriggerBordSizeChangedEvent()
+        {
+            BoardSizeChanged?.Invoke(new Vector2Int(_boardModel.Width, _boardModel.Height));
         }
 
         private void StopCoroutines()
