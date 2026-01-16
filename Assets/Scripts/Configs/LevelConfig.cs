@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 
 namespace Configs
@@ -13,5 +14,20 @@ namespace Configs
         public int Width => _width;
         public int Height => _height;
         public IReadOnlyList<BlockConfig> Blocks => _blocks;
+        
+#if UNITY_EDITOR
+        [ContextMenu("Fill Matrix")]
+        private void FillMatrix()
+        {
+            _blocks.Clear();
+            for (int i = 0; i < _width; i++)
+            {
+                for (int j = 0; j < _height; j++)
+                {
+                    _blocks.Add(new BlockConfig(BlockType.Fire, new Vector2Int(i, j)));
+                }
+            }
+        }
+#endif
     }
 }

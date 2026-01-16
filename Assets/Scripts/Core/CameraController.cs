@@ -14,39 +14,39 @@ namespace Core
         {
             _gamePlayController = gamePlayController;
             _commonConfigs = commonConfigs;
-
             _gamePlayController.BoardSizeChanged += OnBoardSizeChanged;
         }
 
         private void OnBoardSizeChanged(Vector2Int size)
         {
             var blockSize = _commonConfigs.BlockSize;
-            FitCameraToField(size.x, size.y, blockSize.x, blockSize.y);
+            FitCameraToBoard(size, blockSize.x, blockSize.y);
         }
 
-        private void FitCameraToField(int width, int height, float blockWidth, float blockHeight)
+        private void FitCameraToBoard(Vector2Int size, float blockWidth, float blockHeight)
         {
-            float fieldWidth  = width * blockWidth;
-            float fieldHeight = height * blockHeight;
+            float fieldWidth  = size.x * blockWidth;
+            float fieldHeight = size.y * blockHeight;
 
             float aspect = (float)Screen.width / Screen.height;
+            float multiplier;
             
-            float maxSize = Mathf.Max(fieldWidth, fieldHeight) / (2f * aspect);
-
-            // float sizeByHeight = fieldHeight / 2f;
-            // float sizeByWidth  = fieldWidth / (2f * aspect);
-            _camera.orthographicSize = maxSize;
+            // TODO magic numbers, must be improved
+            // For big aspect (mainly for tablets) using another multiplayer
+            if (aspect < 0.6f)
+            {
+                multiplier = 1.4f;
+            }
+            else
+            {
+                multiplier = 1.67f;
+            }
+            
+            _camera.orthographicSize = Mathf.Max(fieldHeight / multiplier, _commonConfigs.MinOrthographicSize);
 
             var position = transform.position;
             position.y = fieldHeight / 2f;
             transform.position = position;
-        }
-
-        public Vector2Int size1;
-        [ContextMenu("TestSiz")]
-        public void Test()
-        {
-            OnBoardSizeChanged(size1);
         }
 
         private void OnDestroy()
