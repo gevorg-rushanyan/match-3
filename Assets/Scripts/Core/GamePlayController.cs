@@ -13,6 +13,7 @@ namespace Core
     {
         [Min(0.01f)]
         [SerializeField] private float _gravityDelay;
+        [SerializeField] private float _winViewDuration;
         private LevelsConfig _levelsConfig;
         private BoardVisual _boardVisual;
         private InputController _inputController;
@@ -71,11 +72,15 @@ namespace Core
 
         private void OnNextLevelSelected()
         {
-            
+            StopCoroutines();
+            _gameStats.NextLevel();
+            StartNewGame(_gameStats.Level);
         }
 
         private void OnRestartSelected()
         {
+            StopCoroutines();
+            StartNewGame(_gameStats.Level);
         }
 
         private void StartNewGame(int levelIndex)
@@ -161,8 +166,7 @@ namespace Core
         private IEnumerator StartNextLevel()
         {
             _uiManager.Show(UIViewType.Win, false);
-            // TODO move to configs
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(_winViewDuration);
             _uiManager.CloseView(UIViewType.Win);
             StartNewGame(_gameStats.Level);
             _nextLevelCoroutine = null;
@@ -182,7 +186,22 @@ namespace Core
 
             return true;
         }
-        
+
+        private void StopCoroutines()
+        {
+            if (_normalizeCoroutine != null)
+            {
+                StopCoroutine(_normalizeCoroutine);
+                _normalizeCoroutine = null;
+            }
+
+            if (_nextLevelCoroutine != null)
+            {
+                StopCoroutine(_nextLevelCoroutine);
+                _nextLevelCoroutine = null;
+            }
+        }
+
         private void OnApplicationPause(bool pause)
         {
             if (pause)
@@ -196,19 +215,9 @@ namespace Core
             TrySaveProgress();
         }
 
-        public void OnDestroy()
+        private void OnDestroy()
         {
-            if (_normalizeCoroutine != null)
-            {
-                StopCoroutine(_normalizeCoroutine);
-                _normalizeCoroutine = null;
-            }
-
-            if (_nextLevelCoroutine != null)
-            {
-                StopCoroutine(_nextLevelCoroutine);
-                _nextLevelCoroutine = null;
-            }
+            StopCoroutines();
 
             if (_inputController != null)
             {
