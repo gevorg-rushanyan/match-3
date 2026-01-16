@@ -155,13 +155,15 @@ namespace Core
             Debug.Log("LEVEL COMPLETED!");
             _gameStats.NextLevel();
             _isBoardChanged = true;
-            TrySaveProgress();
             _nextLevelCoroutine = StartCoroutine(StartNextLevel());
         }
 
         private IEnumerator StartNextLevel()
         {
-            yield return new WaitForSeconds(1);
+            _uiManager.Show(UIViewType.Win, false);
+            // TODO move to configs
+            yield return new WaitForSeconds(1.5f);
+            _uiManager.CloseView(UIViewType.Win);
             StartNewGame(_gameStats.Level);
             _nextLevelCoroutine = null;
         }

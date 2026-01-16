@@ -11,9 +11,9 @@ namespace Core.UI
     {
         [SerializeField] private Transform _root;
         private GameStats _gameStats;
-        private Dictionary<UIViewType, UIView> _windows = new ();
+        private Dictionary<UIViewType, UIView> _viewPrefabs = new ();
         private int _level;
-        private UIView _current;
+        private List<KeyValuePair<UIViewType, UIView>> _openViews = new();
         
         public event Action PlaySelected;
         public event Action NextLevelSelected;
@@ -24,35 +24,55 @@ namespace Core.UI
             _gameStats = gameStats;
             foreach (var window in configs.Views)
             {
-                _windows[window.Type] = window.Prefab;
+                _viewPrefabs[window.Type] = window.Prefab;
             }
         }
         
-        public void Show(UIViewType type)
+        public void Show(UIViewType type, bool closePreviousViews = true)
         {
-            if (!_windows.TryGetValue(type, out var window))
+            if (!_viewPrefabs.TryGetValue(type, out var window))
             {
                 return;
             }
-            
-            if (_current != null)
+
+            if (closePreviousViews)
             {
-                Destroy(_current.gameObject);
+                CloseOpenViews();
             }
             
-            _current = Instantiate(window, _root);
-
-            if (type == UIViewType.Main && _current is MainView main)
+            var view = Instantiate(window, _root);
+            _openViews.Add(new KeyValuePair<UIViewType, UIView>(type, view));
+            if (type == UIViewType.Main && view is MainView main)
             {
                 main.Init(_gameStats);
                 main.PlaySelected += OnPlaySelected;
             }
             
-            if (type == UIViewType.Gameplay && _current is GameplayView gameplay)
+            if (type == UIViewType.Gameplay && view is GameplayView gameplay)
             {
                 gameplay.NextLevelSelected += OnNextLevelSelected;
                 gameplay.RestartSelected += OnRestartSelected;
             }
+        }
+
+        public void CloseView(UIViewType type)
+        {
+            var index = _openViews.FindIndex(x => x.Key == type);
+            if (index != -1)
+            {
+                var keyValuePair = _openViews[index];
+                Destroy(keyValuePair.Value.gameObject);
+                _openViews.RemoveAt(index);
+            }
+        }
+
+        private void CloseOpenViews()
+        {
+            foreach (var openView in _openViews)
+            {
+                Destroy(openView.Value.gameObject);
+            }
+            _openViews.Clear();
         }
 
         private void OnPlaySelected()
