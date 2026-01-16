@@ -80,9 +80,9 @@ namespace Core
 
         private void StartNewGame(int levelIndex)
         {
-            if (levelIndex > _levelsConfig.Levels.Count - 1)
+            if (levelIndex >= _levelsConfig.Levels.Count)
             {
-                levelIndex = levelIndex / _levelsConfig.Levels.Count;
+                levelIndex %= _levelsConfig.Levels.Count;
             }
             var config = _levelsConfig.Levels[levelIndex];
             _boardModel = BoardModelFactory.CreateFromConfig(config);
