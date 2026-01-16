@@ -18,14 +18,12 @@ namespace Configs
     [CreateAssetMenu(fileName = "CommonConfigs", menuName = "Configs/CommonConfigs")]
     public class CommonConfigs : ScriptableObject
     {
-        [Header("Camera configurations")]
-        [SerializeField] private float _minOrthographicSize = 5;
         /// <summary>
         /// These dimensions correspond to the current background dimensions.
         /// If the matrix will large, based on these dimensions will calculate a new scale.
         /// </summary>
         [Space(5)]
-        [Header("See description in comments")]
+        [Header("These dimensions correspond to the current background dimensions. \n If the matrix will large, based on these dimensions will calculate a new scale.")]
         [SerializeField] private Vector2 _defaultBackgroundSize;
         
         [Space(10)]
@@ -34,8 +32,6 @@ namespace Configs
         [SerializeField] private float _blockZPositionOffset;
         [SerializeField] private List<BlockVisualConfig> _blockVisualConfigs = new ();
         
-        public float MinOrthographicSize => _minOrthographicSize;
-        public Vector2 DefaultBackgroundSize => _defaultBackgroundSize;
         public Vector2 BlockSize => _blockSize;
         public float BlockZPositionOffset => _blockZPositionOffset;
         public IReadOnlyList<BlockVisualConfig> BlockVisualConfigs => _blockVisualConfigs;

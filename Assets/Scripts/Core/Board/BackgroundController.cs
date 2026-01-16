@@ -6,15 +6,16 @@ namespace Core.Board
     public class BackgroundController : MonoBehaviour
     {
         [SerializeField] private Transform _background;
+        [Space(5)]
+        [Header("These dimensions correspond to the current background dimensions. \n If the matrix will large, based on these dimensions will calculate a new scale.")]
+        [SerializeField] private Vector2 _defaultBackgroundSize;
         private GamePlayController _gamePlayController;
         private CommonConfigs _commonConfigs;
-        private Vector2 _defaultBackgroundSize;
         
         public void Init(GamePlayController gamePlayController, CommonConfigs commonConfigs)
         {
             _gamePlayController = gamePlayController;
             _commonConfigs = commonConfigs;
-            _defaultBackgroundSize = _commonConfigs.DefaultBackgroundSize;
             _gamePlayController.BoardSizeChanged += OnBoardSizeChanged;
         }
 

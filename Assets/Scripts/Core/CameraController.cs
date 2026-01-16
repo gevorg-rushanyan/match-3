@@ -7,6 +7,11 @@ namespace Core
     {
         [SerializeField] private Camera _camera;
         
+        [Space(5),Header("Configurations")]
+        [SerializeField] private float _aspectRatioLimiter = 0.6f;
+        [SerializeField] private float _minOrthographicSizeForBigAspectRatio = 5;
+        [SerializeField] private float _minOrthographicSizeForSmallAspectRatio = 4.5f;
+        
         private GamePlayController _gamePlayController;
         private CommonConfigs _commonConfigs;
 
@@ -27,25 +32,29 @@ namespace Core
         {
             float fieldWidth  = size.x * blockWidth;
             float fieldHeight = size.y * blockHeight;
+            float maxSize = Mathf.Max(fieldWidth, fieldHeight);
 
             float aspect = (float)Screen.width / Screen.height;
             float multiplier;
+            float minOrthographicSize;
             
             // TODO magic numbers, must be improved
             // For big aspect (mainly for tablets) using another multiplayer
-            if (aspect < 0.6f)
+            if (aspect < _aspectRatioLimiter)
             {
                 multiplier = 1.4f;
+                minOrthographicSize = _minOrthographicSizeForSmallAspectRatio;
             }
             else
             {
                 multiplier = 1.67f;
+                minOrthographicSize = _minOrthographicSizeForBigAspectRatio;
             }
             
-            _camera.orthographicSize = Mathf.Max(fieldHeight / multiplier, _commonConfigs.MinOrthographicSize);
+            _camera.orthographicSize = Mathf.Max(maxSize / multiplier, minOrthographicSize);
 
             var position = transform.position;
-            position.y = fieldHeight / 2f;
+            position.y = maxSize / 2f;
             transform.position = position;
         }
 
