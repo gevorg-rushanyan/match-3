@@ -13,53 +13,41 @@ MonoBehaviour:
   m_Name: Level_2
   m_EditorClassIdentifier: 
   _width: 6
-  _height: 6
+  _height: 7
   _blocks:
-  - _type: 1
+  - _type: 0
     _position: {x: 1, y: 0}
   - _type: 1
+    _position: {x: 2, y: 0}
+  - _type: 0
+    _position: {x: 3, y: 0}
+  - _type: 0
+    _position: {x: 4, y: 0}
+  - _type: 0
     _position: {x: 1, y: 1}
   - _type: 1
-    _position: {x: 1, y: 2}
-  - _type: 1
-    _position: {x: 1, y: 3}
-  - _type: 1
-    _position: {x: 1, y: 4}
-  - _type: 1
-    _position: {x: 1, y: 5}
-  - _type: 1
-    _position: {x: 2, y: 0}
-  - _type: 1
     _position: {x: 2, y: 1}
-  - _type: 1
-    _position: {x: 2, y: 2}
-  - _type: 1
-    _position: {x: 2, y: 3}
-  - _type: 1
-    _position: {x: 2, y: 4}
-  - _type: 1
-    _position: {x: 2, y: 5}
-  - _type: 1
-    _position: {x: 3, y: 0}
-  - _type: 1
+  - _type: 0
     _position: {x: 3, y: 1}
+  - _type: 0
+    _position: {x: 4, y: 1}
+  - _type: 1
+    _position: {x: 1, y: 2}
+  - _type: 0
+    _position: {x: 2, y: 2}
   - _type: 1
     _position: {x: 3, y: 2}
   - _type: 1
-    _position: {x: 3, y: 3}
-  - _type: 1
-    _position: {x: 3, y: 4}
-  - _type: 1
-    _position: {x: 3, y: 5}
-  - _type: 1
-    _position: {x: 4, y: 0}
-  - _type: 1
-    _position: {x: 4, y: 1}
-  - _type: 1
     _position: {x: 4, y: 2}
-  - _type: 1
+  - _type: 0
+    _position: {x: 1, y: 3}
+  - _type: 0
+    _position: {x: 2, y: 3}
+  - _type: 0
     _position: {x: 4, y: 3}
+  - _type: 0
+    _position: {x: 1, y: 4}
   - _type: 1
-    _position: {x: 4, y: 4}
-  - _type: 1
-    _position: {x: 4, y: 5}
+    _position: {x: 2, y: 4}
+  - _type: 0
+    _position: {x: 2, y: 5}

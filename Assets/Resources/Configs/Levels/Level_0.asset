@@ -12,34 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5223928cf9444820b0e4dae5b366afff, type: 3}
   m_Name: Level_0
   m_EditorClassIdentifier: 
-  _width: 6
-  _height: 6
+  _width: 7
+  _height: 3
   _blocks:
   - _type: 0
     _position: {x: 1, y: 0}
-  - _type: 1
-    _position: {x: 2, y: 0}
   - _type: 0
     _position: {x: 3, y: 0}
-  - _type: 0
+  - _type: 1
     _position: {x: 4, y: 0}
+  - _type: 1
+    _position: {x: 5, y: 0}
   - _type: 0
     _position: {x: 1, y: 1}
   - _type: 1
-    _position: {x: 2, y: 1}
-  - _type: 0
     _position: {x: 3, y: 1}
-  - _type: 0
-    _position: {x: 4, y: 1}
-  - _type: 1
-    _position: {x: 1, y: 2}
-  - _type: 0
-    _position: {x: 2, y: 2}
-  - _type: 1
-    _position: {x: 3, y: 2}
-  - _type: 1
-    _position: {x: 4, y: 2}
-  - _type: 0
-    _position: {x: 3, y: 3}
-  - _type: 0
-    _position: {x: 4, y: 3}
