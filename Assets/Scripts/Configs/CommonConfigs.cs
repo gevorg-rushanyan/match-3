@@ -18,12 +18,14 @@ namespace Configs
     [CreateAssetMenu(fileName = "CommonConfigs", menuName = "Configs/CommonConfigs")]
     public class CommonConfigs : ScriptableObject
     {
+        [SerializeField] private int _targetFPS;
         [Space(10)]
         [Header("Block configurations")]
         [SerializeField] private Vector2 _blockSize;
         [SerializeField] private float _blockZPositionOffset;
         [SerializeField] private List<BlockVisualConfig> _blockVisualConfigs = new ();
         
+        public int TargetFPS => _targetFPS;
         public Vector2 BlockSize => _blockSize;
         public float BlockZPositionOffset => _blockZPositionOffset;
         public IReadOnlyList<BlockVisualConfig> BlockVisualConfigs => _blockVisualConfigs;

@@ -31,7 +31,8 @@ namespace Core
             {
                 return;
             }
-            
+         
+            Application.targetFrameRate = _commonConfigs.TargetFPS;
             _backgroundController.Init(_gamePlayController, _commonConfigs);
             _balloonsController.Init(_gamePlayController, _commonConfigs);
             _cameraController.Init(_gamePlayController, _commonConfigs);
