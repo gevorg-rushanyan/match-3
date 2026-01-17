@@ -8,7 +8,7 @@ namespace Core.Board
     public class BoardSystem
     {
         private readonly BoardModel _model;
-        private int _matchCount;
+        private readonly int _matchCount;
         public event Action<Vector2Int, Vector2Int> Move;
         public event Action<Vector2Int, Vector2Int> Swap;
         public event Action<Vector2Int> Destroy;

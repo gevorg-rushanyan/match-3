@@ -162,7 +162,7 @@ namespace Core
 
             while (true)
             {
-                while (_boardSystem.ApplyGravity())
+                if (_boardSystem.ApplyGravity())
                 {
                     _boardChanged = true;
                     yield return new WaitForSeconds(_delayForGravirty);
