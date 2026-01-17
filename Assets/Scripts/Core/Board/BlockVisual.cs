@@ -7,6 +7,8 @@ namespace Core.Board
 {
     public class BlockVisual : MonoBehaviour
     {
+        private const string DestroyTrigger = "destroy";
+        [SerializeField] private Animator _animator;
         [SerializeField] private float _moveDuration = 0.15f;
         [SerializeField] private float _destroyDuration = 0.15f;
         private BlockVisualState _state;
@@ -23,6 +25,7 @@ namespace Core.Board
         
         public void Init(BlockType type, Vector2Int gridPosition, Vector3 worldPosition)
         {
+            _animator.SetBool(DestroyTrigger, false);
             _state = BlockVisualState.Idle;
             _type = type;
             _gridPosition = gridPosition;
@@ -84,7 +87,7 @@ namespace Core.Board
 
         private IEnumerator DestroyAnimation(Action callback)
         {
-            transform.localScale = Vector3.one * 0.3f;
+            _animator.SetBool(DestroyTrigger, true);
             yield return new WaitForSeconds(_destroyDuration);
             callback?.Invoke();
             OnAnimationFinished?.Invoke();
