@@ -13,7 +13,7 @@ namespace Core
     public class GamePlayController : MonoBehaviour
     {
         [Min(0.01f)]
-        [SerializeField] private float _delayForGravirty;
+        [SerializeField] private float _delayForGravity;
         [SerializeField] private float _winViewDuration;
         // Dependencies
         private LevelsConfig _levelsConfig;
@@ -22,7 +22,6 @@ namespace Core
         private SaveSystem _saveSystem;
         private UIManager _uiManager;
         private GameStats _gameStats;
-        private CameraController _cameraController;
         
         private int _matchCount;
         private BoardModel _boardModel;
@@ -110,7 +109,7 @@ namespace Core
             _boardSystem = new BoardSystem(_boardModel, _matchCount);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
             _boardChanged = true;
-            TriggerBordSizeChangedEvent();
+            TriggerBoardSizeChangedEvent();
             _swipeEnabled = true;
         }
         
@@ -126,7 +125,7 @@ namespace Core
             _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
             _boardSystem = new BoardSystem(_boardModel, _matchCount);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
-            TriggerBordSizeChangedEvent();
+            TriggerBoardSizeChangedEvent();
             _swipeEnabled = true;
         }
 
@@ -157,7 +156,7 @@ namespace Core
             // Means block moved to empty space, delay before gravity
             if (moveType == MoveType.Move)
             {
-                yield return new WaitForSeconds(_delayForGravirty);
+                yield return new WaitForSeconds(_delayForGravity);
             }
 
             while (true)
@@ -165,7 +164,7 @@ namespace Core
                 if (_boardSystem.ApplyGravity())
                 {
                     _boardChanged = true;
-                    yield return new WaitForSeconds(_delayForGravirty);
+                    yield return new WaitForSeconds(_delayForGravity);
                 }
                 
                 var matchBlocks = _boardSystem.FindMatches();
@@ -178,7 +177,7 @@ namespace Core
                 _boardChanged = true;
                 if (destroyed)
                 {
-                    yield return new WaitForSeconds(_delayForGravirty);
+                    yield return new WaitForSeconds(_delayForGravity);
                 }
             }
             
@@ -221,7 +220,7 @@ namespace Core
             return true;
         }
 
-        private void TriggerBordSizeChangedEvent()
+        private void TriggerBoardSizeChangedEvent()
         {
             BoardSizeChanged?.Invoke(new Vector2Int(_boardModel.Width, _boardModel.Height));
         }
