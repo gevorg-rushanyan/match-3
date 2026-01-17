@@ -8,7 +8,8 @@ namespace Core.Board
     public class BoardSystem
     {
         private readonly BoardModel _model;
-        private readonly int _matchCount;
+        private readonly MatchFinder _matchFinder;
+        
         public event Action<Vector2Int, Vector2Int> Move;
         public event Action<Vector2Int, Vector2Int> Swap;
         public event Action<Vector2Int> Destroy;
@@ -16,7 +17,7 @@ namespace Core.Board
         public BoardSystem(BoardModel model, int matchCount)
         {
             _model = model;
-            _matchCount = matchCount;
+            _matchFinder = new MatchFinder(model, matchCount);
         }
         
         public MoveType TryMoveBlock(Vector2Int from, Vector2Int to, Vector2Int direction)
@@ -102,51 +103,7 @@ namespace Core.Board
         
         public HashSet<Vector2Int> FindMatches()
         {
-            var result = new HashSet<Vector2Int>();
-            var visited = new bool[_model.Width][];
-            for (int index = 0; index < _model.Width; index++)
-            {
-                visited[index] = new bool[_model.Height];
-            }
-
-            for (int x = 0; x < _model.Width; x++)
-            {
-                for (int y = 0; y < _model.Height; y++)
-                {
-                    if (visited[x][y])
-                    {
-                        continue;
-                    }
-
-                    var block = _model.Get(x, y);
-                    if (block == null)
-                    {
-                        continue;
-                    }
-
-                    var connectedBlocks = _model.FindConnectedBlocks(new Vector2Int(x, y));
-                    if (connectedBlocks == null || connectedBlocks.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    foreach (var p in connectedBlocks)
-                    {
-                        visited[p.x][p.y] = true;
-                    }
-                    
-                    var matches = _model.FindMatches(connectedBlocks, _matchCount);
-                    if (matches != null && matches.Count > 0)
-                    {
-                        foreach (var point in matches)
-                        {
-                            result.Add(point);
-                        }
-                    }
-                }
-            }
-
-            return result;
+            return _matchFinder.FindAllMatches();
         }
         
         public bool DestroyBlocks(HashSet<Vector2Int> blocks)
