@@ -10,16 +10,14 @@ namespace Core.Board
         [SerializeField] private Transform _blocksContainer;
         
         private readonly Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new ();
+        private BoardSystem _boardSystem;
         private Vector2 _blockSize;
         private float _blockZPositionOffset;
         private int _width; 
         private int _height;
         private bool _isInitialized;
         private int _activeAnimations;
-        private bool _isAnimating;
         private BlockVisual[,] _visualGrid;
-        
-        public bool IsAnimating => _isAnimating;
 
         public void Init(CommonConfigs commonConfigs)
         {
@@ -39,7 +37,7 @@ namespace Core.Board
             _isInitialized = true;
         }
 
-        public void CreateBoard(BoardModel model)
+        public void CreateBoard(BoardModel model, BoardSystem boardSystem)
         {
             if (!_isInitialized)
             {
@@ -52,7 +50,7 @@ namespace Core.Board
                 Debug.LogError("BoardModel is null");
                 return;
             }
-
+            
             ClearBoard();
             _width = model.Width;
             _height = model.Height;
@@ -80,11 +78,33 @@ namespace Core.Board
                     visual.OnAnimationFinished += AnimationFinished;
                 }
             }
-
+            SetBoardSystem(boardSystem);
             CenterBoardHorizontally();
         }
 
-        public void MoveVisual(Vector2Int from, Vector2Int to)
+        private void SetBoardSystem(BoardSystem boardSystem)
+        {
+            UnsubscribeFromBoardEvents();
+            _boardSystem = boardSystem;
+            _boardSystem.Move += Move;
+            _boardSystem.Swap += Swap;
+            _boardSystem.Destroy += Destroy;
+        }
+
+        private void UnsubscribeFromBoardEvents()
+        {
+            if (_boardSystem == null)
+            {
+                return;
+            }
+            
+            _boardSystem.Move -= Move;
+            _boardSystem.Swap -= Swap;
+            _boardSystem.Destroy -= Destroy;
+            _boardSystem = null;
+        }
+
+        private void Move(Vector2Int from, Vector2Int to)
         {
             if (_visualGrid == null)
             {
@@ -115,7 +135,7 @@ namespace Core.Board
             block.MoveTo(GridToWorldPosition(to.x, to.y));
         }
         
-        public void SwapVisual(Vector2Int a, Vector2Int b)
+        private void Swap(Vector2Int a, Vector2Int b)
         {
             if (_visualGrid == null)
             {
@@ -145,7 +165,7 @@ namespace Core.Board
             blockB.MoveTo(GridToWorldPosition(a.x, a.y));
         }
         
-        public void DestroyVisual(Vector2Int pos)
+        private void Destroy(Vector2Int pos)
         {
             var block = _visualGrid[pos.x, pos.y];
             if (block == null)
@@ -228,20 +248,16 @@ namespace Core.Board
         private void AnimationStarted()
         {
             _activeAnimations++;
-            if (_activeAnimations == 1)
-            {
-                _isAnimating = true;
-            }
         }
         
         private void AnimationFinished()
         {
             _activeAnimations--;
-            if (_activeAnimations <= 0)
-            {
-                _activeAnimations = 0;
-                _isAnimating = false;
-            }
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeFromBoardEvents();
         }
     }
 }

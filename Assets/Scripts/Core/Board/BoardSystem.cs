@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,13 +6,14 @@ namespace Core.Board
 {
     public class BoardSystem
     {
-        private BoardModel _model;
-        private BoardVisual _view;
+        private readonly BoardModel _model;
+        public event Action<Vector2Int, Vector2Int> Move;
+        public event Action<Vector2Int, Vector2Int> Swap;
+        public event Action<Vector2Int> Destroy;
 
-        public BoardSystem(BoardModel model, BoardVisual view)
+        public BoardSystem(BoardModel model)
         {
             _model = model;
-            _view = view;
         }
         
         public bool TryMoveBlock(Vector2Int from, Vector2Int to, Vector2Int direction)
@@ -40,8 +42,7 @@ namespace Core.Board
                 var toBlock = _model.Get(to.x, to.y);
                 _model.Set(to.x, to.y, fromBlock);
                 _model.Set(from.x, from.y, toBlock);
-
-                _view.SwapVisual(from, to);
+                Swap?.Invoke(from, to);
 
                 return true;
             }
@@ -51,7 +52,7 @@ namespace Core.Board
             {
                 _model.Set(to.x, to.y, fromBlock);
                 _model.Remove(from.x, from.y);
-                _view.MoveVisual(from, to);
+                Move?.Invoke(from, to);
 
                 return true;
             }
@@ -86,7 +87,7 @@ namespace Core.Board
                         _model.Set(x, y, block);
                         _model.Remove(x, aboveY);
                             
-                        _view.MoveVisual(new Vector2Int(x, aboveY), new Vector2Int(x, y));
+                        Move?.Invoke(new Vector2Int(x, aboveY), new Vector2Int(x, y));
 
                         anyMoved = true;
                     }
@@ -153,10 +154,10 @@ namespace Core.Board
                 return false;
             }
 
-            foreach (var area in blocks)
+            foreach (var block in blocks)
             {
-                _model.Remove(area.x, area.y);
-                _view.DestroyVisual(area);
+                _model.Remove(block.x, block.y);
+                Destroy?.Invoke(block);
             }
 
             return true;

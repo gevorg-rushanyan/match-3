@@ -103,8 +103,8 @@ namespace Core
             }
             var config = _levelsConfig.Levels[levelIndex];
             _boardModel = BoardModelFactory.CreateFromConfig(config);
-            _boardSystem = new BoardSystem(_boardModel, _boardVisual);
-            _boardVisual.CreateBoard(_boardModel);
+            _boardSystem = new BoardSystem(_boardModel);
+            _boardVisual.CreateBoard(_boardModel, _boardSystem);
             _isBoardChanged = true;
             TriggerBordSizeChangedEvent();
         }
@@ -119,8 +119,8 @@ namespace Core
             }
             
             _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
-            _boardSystem = new BoardSystem(_boardModel, _boardVisual);
-            _boardVisual.CreateBoard(_boardModel);
+            _boardSystem = new BoardSystem(_boardModel);
+            _boardVisual.CreateBoard(_boardModel, _boardSystem);
             TriggerBordSizeChangedEvent();
         }
 
