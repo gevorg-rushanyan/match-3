@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Core.Persistence;
 using Enums;
 using UnityEngine;
@@ -120,7 +121,60 @@ namespace Core.Board
             return result;
         }
         
-        public HashSet<Vector2Int> FindMatches(HashSet<Vector2Int> connectedBlocks, int minCount)
+        public HashSet<Vector2Int> FindMatches(HashSet<Vector2Int> blocks, int matchCount)
+        {
+            var byRow = blocks.GroupBy(p => p.y);
+            foreach (var row in byRow)
+            {
+                if (HasConsecutive(row.Select(p => p.x), matchCount))
+                {
+                    return blocks;
+                }
+            }
+            
+            var byColumn = blocks.GroupBy(p => p.x);
+            foreach (var col in byColumn)
+            {
+                if (HasConsecutive(col.Select(p => p.y), matchCount))
+                {
+                    return blocks;
+                }
+            }
+
+            return null;
+        }
+        
+        private bool HasConsecutive(IEnumerable<int> values, int matchCount)
+        {
+            var ordered = values.OrderBy(v => v).ToList();
+
+            int count = 1;
+            for (int i = 1; i < ordered.Count; i++)
+            {
+                if (ordered[i] == ordered[i - 1] + 1)
+                {
+                    count++;
+                    if (count >= matchCount)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    count = 1;
+                }
+            }
+
+            return false;
+        }
+        
+        /// <summary>
+        /// Finds only horizontal/vertical blocks which have minCount consecutive
+        /// </summary>
+        /// <param name="connectedBlocks"></param>
+        /// <param name="minCount"></param>
+        /// <returns></returns>
+        public HashSet<Vector2Int> FindMatches2(HashSet<Vector2Int> connectedBlocks, int minCount)
         {
             var result = new HashSet<Vector2Int>();
 
