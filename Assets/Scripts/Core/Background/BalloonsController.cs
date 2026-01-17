@@ -16,7 +16,6 @@ namespace Core.Background
         [SerializeField] private float _maxAmplitude = 1f;
         [SerializeField] private float _minFrequency = 1f;
         [SerializeField] private float _maxFrequency = 3f;
-        [SerializeField] private float _balloonZPosition = 1f;
         
         private GamePlayController _gamePlayController;
         private CommonConfigs _commonConfigs;
@@ -42,7 +41,7 @@ namespace Core.Background
                 _balloonPool = new BalloonPool(_balloonPrefab, transform);
             }
             
-            _nextSpawnTime = Random.Range(_minSpawnInterval, _maxSpawnInterval);
+            _nextSpawnTime = _minSpawnInterval;
             _isInitialized = true;
         }
         
@@ -54,12 +53,12 @@ namespace Core.Background
         private void UpdateBoundaries(Vector2Int size)
         {
             float halfWidth = (size.x * _commonConfigs.BlockSize.x) / 2f;
-            float halfHeight = (size.y * _commonConfigs.BlockSize.y) / 2f;
+            float height = size.y * _commonConfigs.BlockSize.y;
             
             _leftBoundary = -halfWidth;
             _rightBoundary = halfWidth;
-            _bottomBoundary = -halfHeight;
-            _topBoundary = halfHeight;
+            _bottomBoundary = height / 1.5f;
+            _topBoundary = height;
         }
         
         private void Update()

@@ -5,7 +5,7 @@ namespace Core.Background
 {
     public class BackgroundController : MonoBehaviour
     {
-        [SerializeField] private Transform _backgroundImage;
+        [SerializeField] private Transform _background;
         [Space(5)]
         [Header("Background Size Settings")]
         [SerializeField] private Vector2 _defaultBackgroundSize;
@@ -34,7 +34,7 @@ namespace Core.Background
             
             float multiplier = Mathf.Max(widthMultiplier, heightMultiplier);
             
-            _backgroundImage.localScale = multiplier <= 1 ? Vector3.one : Vector3.one * multiplier;
+            _background.localScale = multiplier <= 1 ? Vector3.one : Vector3.one * multiplier;
         }
 
         private void OnDestroy()
