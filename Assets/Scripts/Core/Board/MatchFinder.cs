@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Core.Board
@@ -11,8 +10,14 @@ namespace Core.Board
         
         // Cached arrays to avoid GC allocations
         private bool[,] _visited;
+        private bool[,] _floodFillVisited;
         private int _cachedWidth;
         private int _cachedHeight;
+        
+        // Cached collections to avoid GC allocations
+        private readonly Stack<Vector2Int> _stack = new(32);
+        private readonly HashSet<Vector2Int> _connectedBlocks = new(32);
+        private readonly HashSet<Vector2Int> _resultSet = new(32);
         
         public MatchFinder(BoardModel model, int matchCount)
         {
@@ -22,7 +27,7 @@ namespace Core.Board
         
         public HashSet<Vector2Int> FindAllMatches()
         {
-            var result = new HashSet<Vector2Int>();
+            _resultSet.Clear();
             EnsureVisitedCache();
             ClearVisited();
 
@@ -41,58 +46,58 @@ namespace Core.Board
                         continue;
                     }
 
-                    var connectedBlocks = FindConnectedBlocks(new Vector2Int(x, y));
-                    if (connectedBlocks == null || connectedBlocks.Count == 0)
+                    FindConnectedBlocks(new Vector2Int(x, y));
+                    if (_connectedBlocks.Count == 0)
                     {
                         continue;
                     }
 
-                    foreach (var p in connectedBlocks)
+                    foreach (var p in _connectedBlocks)
                     {
                         _visited[p.x, p.y] = true;
                     }
                     
-                    var matches = FindMatches(connectedBlocks);
-                    if (matches && connectedBlocks.Count > 0)
+                    if (HasMatch(_connectedBlocks))
                     {
-                        foreach (var point in connectedBlocks)
+                        foreach (var point in _connectedBlocks)
                         {
-                            result.Add(point);
+                            _resultSet.Add(point);
                         }
                     }
                 }
             }
 
-            return result;
+            return _resultSet;
         }
         
-        private HashSet<Vector2Int> FindConnectedBlocks(Vector2Int start)
+        private void FindConnectedBlocks(Vector2Int start)
         {
+            _connectedBlocks.Clear();
+            _stack.Clear();
+            
             var startBlock = _model.Get(start.x, start.y);
             if (startBlock == null)
             {
-                return null;
+                return;
             }
 
             var type = startBlock.Type;
-            var result = new HashSet<Vector2Int>();
-            var stack = new Stack<Vector2Int>();
             
             EnsureVisitedCache();
-            ClearVisited();
+            System.Array.Clear(_floodFillVisited, 0, _floodFillVisited.Length);
 
-            stack.Push(start);
+            _stack.Push(start);
 
-            while (stack.Count > 0)
+            while (_stack.Count > 0)
             {
-                var pos = stack.Pop();
+                var pos = _stack.Pop();
 
                 if (!_model.InBounds(pos.x, pos.y))
                 {
                     continue;
                 }
 
-                if (_visited[pos.x, pos.y])
+                if (_floodFillVisited[pos.x, pos.y])
                 {
                     continue;
                 }
@@ -103,123 +108,66 @@ namespace Core.Board
                     continue;
                 }
 
-                _visited[pos.x, pos.y] = true;
-                result.Add(pos);
+                _floodFillVisited[pos.x, pos.y] = true;
+                _connectedBlocks.Add(pos);
 
-                stack.Push(pos + Vector2Int.up);
-                stack.Push(pos + Vector2Int.down);
-                stack.Push(pos + Vector2Int.left);
-                stack.Push(pos + Vector2Int.right);
+                _stack.Push(pos + Vector2Int.up);
+                _stack.Push(pos + Vector2Int.down);
+                _stack.Push(pos + Vector2Int.left);
+                _stack.Push(pos + Vector2Int.right);
             }
-
-            return result;
         }
         
-        private bool FindMatches(HashSet<Vector2Int> blocks)
+        private bool HasMatch(HashSet<Vector2Int> blocks)
         {
-            var byRow = blocks.GroupBy(p => p.y);
-            foreach (var row in byRow)
+            foreach (var block in blocks)
             {
-                if (HasConsecutive(row.Select(p => p.x)))
+                // Check horizontal match
+                int horizontalCount = 1;
+                
+                var left = block + Vector2Int.left;
+                while (blocks.Contains(left))
+                {
+                    horizontalCount++;
+                    left += Vector2Int.left;
+                }
+                
+                var right = block + Vector2Int.right;
+                while (blocks.Contains(right))
+                {
+                    horizontalCount++;
+                    right += Vector2Int.right;
+                }
+                
+                if (horizontalCount >= _matchCount)
+                {
+                    return true;
+                }
+                
+                // Check vertical match
+                int verticalCount = 1;
+                
+                var down = block + Vector2Int.down;
+                while (blocks.Contains(down))
+                {
+                    verticalCount++;
+                    down += Vector2Int.down;
+                }
+                
+                var up = block + Vector2Int.up;
+                while (blocks.Contains(up))
+                {
+                    verticalCount++;
+                    up += Vector2Int.up;
+                }
+                
+                if (verticalCount >= _matchCount)
                 {
                     return true;
                 }
             }
             
-            var byColumn = blocks.GroupBy(p => p.x);
-            foreach (var col in byColumn)
-            {
-                if (HasConsecutive(col.Select(p => p.y)))
-                {
-                    return true;
-                }
-            }
-
             return false;
-        }
-        
-        private bool HasConsecutive(IEnumerable<int> values)
-        {
-            var ordered = values.OrderBy(v => v).ToList();
-
-            int count = 1;
-            for (int i = 1; i < ordered.Count; i++)
-            {
-                if (ordered[i] == ordered[i - 1] + 1)
-                {
-                    count++;
-                    if (count >= _matchCount)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    count = 1;
-                }
-            }
-
-            return false;
-        }
-        
-        /// <summary>
-        /// Finds only horizontal/vertical blocks which have minCount consecutive
-        /// </summary>
-        /// <param name="connectedBlocks"></param>
-        /// <param name="minCount"></param>
-        /// <returns></returns>
-        public HashSet<Vector2Int> FindMatches2(HashSet<Vector2Int> connectedBlocks, int minCount)
-        {
-            var result = new HashSet<Vector2Int>();
-
-            foreach (var block in connectedBlocks)
-            {
-                // Horizontal
-                int hCount = 1;
-
-                var left = block + Vector2Int.left;
-                while (connectedBlocks.Contains(left))
-                {
-                    hCount++;
-                    left += Vector2Int.left;
-                }
-
-                var right = block + Vector2Int.right;
-                while (connectedBlocks.Contains(right))
-                {
-                    hCount++;
-                    right += Vector2Int.right;
-                }
-
-                if (hCount >= minCount)
-                {
-                    result.Add(block);
-                }
-
-                // Vertical
-                int vCount = 1;
-
-                var down = block + Vector2Int.down;
-                while (connectedBlocks.Contains(down))
-                {
-                    vCount++;
-                    down += Vector2Int.down;
-                }
-
-                var up = block + Vector2Int.up;
-                while (connectedBlocks.Contains(up))
-                {
-                    vCount++;
-                    up += Vector2Int.up;
-                }
-
-                if (vCount >= minCount)
-                {
-                    result.Add(block);
-                }
-            }
-
-            return result;
         }
         
         private void EnsureVisitedCache()
@@ -227,6 +175,7 @@ namespace Core.Board
             if (_visited == null || _cachedWidth != _model.Width || _cachedHeight != _model.Height)
             {
                 _visited = new bool[_model.Width, _model.Height];
+                _floodFillVisited = new bool[_model.Width, _model.Height];
                 _cachedWidth = _model.Width;
                 _cachedHeight = _model.Height;
             }
