@@ -71,7 +71,7 @@ namespace Core
         private void OnPlaySelected()
         {
             _uiManager.Show(UIViewType.Gameplay);
-            if (_gameSaveData != null)
+            if (_gameSaveData is {board: {blocks: {Count: > 0}}})
             {
                 LoadFromSave(_gameSaveData);
                 _gameSaveData = null;
@@ -114,7 +114,7 @@ namespace Core
             var boardData = save.board;
             if (boardData == null)
             {
-                StartNewGame(_gameStats.Level);
+                Debug.LogError("Invalid Save Data");
                 return;
             }
             
