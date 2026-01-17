@@ -28,8 +28,9 @@ namespace Core
         private BoardSystem _boardSystem;
         private Coroutine _normalizeCoroutine;
         private Coroutine _nextLevelCoroutine;
-        private bool _isBoardChanged;
         private GameSaveData _gameSaveData;
+        private bool _boardChanged;
+        private bool _swipeEnabled;
         
         public event Action<Vector2Int> BoardSizeChanged; 
         
@@ -105,8 +106,9 @@ namespace Core
             _boardModel = BoardModelFactory.CreateFromConfig(config);
             _boardSystem = new BoardSystem(_boardModel);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
-            _isBoardChanged = true;
+            _boardChanged = true;
             TriggerBordSizeChangedEvent();
+            _swipeEnabled = true;
         }
         
         private void LoadFromSave(GameSaveData save)
@@ -122,16 +124,22 @@ namespace Core
             _boardSystem = new BoardSystem(_boardModel);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
             TriggerBordSizeChangedEvent();
+            _swipeEnabled = true;
         }
 
         private void OnSwipe(Vector2Int from, Vector2Int to, Vector2Int direction)
         {
+            if (!_swipeEnabled)
+            {
+                return;
+            }
+
             if (!_boardSystem.TryMoveBlock(from, to, direction))
             {
                 return;
             }
             
-            _isBoardChanged = true;
+            _boardChanged = true;
             if (_normalizeCoroutine != null)
             {
                 StopCoroutine(_normalizeCoroutine);
@@ -148,7 +156,7 @@ namespace Core
             {
                 while (_boardSystem.ApplyGravity())
                 {
-                    _isBoardChanged = true;
+                    _boardChanged = true;
                     yield return new WaitForSeconds(_gravityDelay);
                 }
                 
@@ -159,7 +167,7 @@ namespace Core
                 }
                 
                 _boardSystem.DestroyBlocks(matchBlocks);
-                _isBoardChanged = true;
+                _boardChanged = true;
                 yield return new WaitForSeconds(_gravityDelay);
             }
             
@@ -172,8 +180,9 @@ namespace Core
         private void OnLevelCompleted()
         {
             Debug.Log("LEVEL COMPLETED!");
+            _swipeEnabled = false;
             _gameStats.NextLevel();
-            _isBoardChanged = true;
+            _boardChanged = true;
             _nextLevelCoroutine = StartCoroutine(StartNextLevel());
         }
 
@@ -188,7 +197,7 @@ namespace Core
 
         private bool TrySaveProgress()
         {
-            if (!_isBoardChanged)
+            if (!_boardChanged)
             {
                 return false;
             }
@@ -196,7 +205,7 @@ namespace Core
             var boardSaveData = _boardModel.ToSaveData();
             var gameSaveData = new GameSaveData(_gameStats.Level, boardSaveData);
             _saveSystem.Save(gameSaveData);
-            _isBoardChanged = false;
+            _boardChanged = false;
 
             return true;
         }
