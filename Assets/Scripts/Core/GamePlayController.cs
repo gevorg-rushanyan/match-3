@@ -24,6 +24,7 @@ namespace Core
         private GameStats _gameStats;
         private CameraController _cameraController;
         
+        private int _matchCount;
         private BoardModel _boardModel;
         private BoardSystem _boardSystem;
         private Coroutine _normalizeCoroutine;
@@ -40,7 +41,8 @@ namespace Core
             InputController inputController,
             SaveSystem saveSystem,
             UIManager uiManager,
-            GameStats gameStats)
+            GameStats gameStats,
+            int matchCount)
         {
             _levelsConfig = levelsConfig;
             _boardVisual = boardVisual;
@@ -48,6 +50,7 @@ namespace Core
             _saveSystem = saveSystem;
             _uiManager = uiManager;
             _gameStats = gameStats;
+            _matchCount = matchCount;
             
             if (inputController != null)
             {
@@ -104,7 +107,7 @@ namespace Core
             }
             var config = _levelsConfig.Levels[levelIndex];
             _boardModel = BoardModelFactory.CreateFromConfig(config);
-            _boardSystem = new BoardSystem(_boardModel);
+            _boardSystem = new BoardSystem(_boardModel, _matchCount);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
             _boardChanged = true;
             TriggerBordSizeChangedEvent();
@@ -121,7 +124,7 @@ namespace Core
             }
             
             _boardModel = BoardModelFactory.CreateFromSave(boardData.width, boardData.height, boardData.blocks);
-            _boardSystem = new BoardSystem(_boardModel);
+            _boardSystem = new BoardSystem(_boardModel, _matchCount);
             _boardVisual.CreateBoard(_boardModel, _boardSystem);
             TriggerBordSizeChangedEvent();
             _swipeEnabled = true;

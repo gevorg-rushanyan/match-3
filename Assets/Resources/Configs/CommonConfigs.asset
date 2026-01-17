@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27d9d73fc37540e1b251ccad92d34883, type: 3}
   m_Name: CommonConfigs
   m_EditorClassIdentifier: 
-  _defaultBackgroundSize: {x: 5, y: 7}
+  _targetFPS: 60
+  _matchCount: 3
   _blockSize: {x: 0.89, y: 0.8}
   _blockZPositionOffset: -0.01
   _blockVisualConfigs:

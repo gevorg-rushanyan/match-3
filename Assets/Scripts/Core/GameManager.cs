@@ -40,7 +40,7 @@ namespace Core
             _uiManager.Init(_uiConfigs, _gameStats);
             _boardVisual.Init(_commonConfigs);
             _saveSystem = new SaveSystem();
-            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem, _uiManager, _gameStats);
+            _gamePlayController.Init(_levelsConfig, _boardVisual, _inputController, _saveSystem, _uiManager, _gameStats, _commonConfigs.MatchCount);
             
             _gamePlayController.StartGame();
         }

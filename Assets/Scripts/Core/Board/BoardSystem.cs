@@ -7,13 +7,15 @@ namespace Core.Board
     public class BoardSystem
     {
         private readonly BoardModel _model;
+        private int _matchCount;
         public event Action<Vector2Int, Vector2Int> Move;
         public event Action<Vector2Int, Vector2Int> Swap;
         public event Action<Vector2Int> Destroy;
 
-        public BoardSystem(BoardModel model)
+        public BoardSystem(BoardModel model, int matchCount)
         {
             _model = model;
+            _matchCount = matchCount;
         }
         
         public bool TryMoveBlock(Vector2Int from, Vector2Int to, Vector2Int direction)
@@ -132,8 +134,7 @@ namespace Core.Board
                         visited[p.x][p.y] = true;
                     }
                     
-                    // TODO MinCount 3 move to configs
-                    var matches = _model.FindMatches(connectedBlocks, 3);
+                    var matches = _model.FindMatches(connectedBlocks, _matchCount);
                     if (matches != null && matches.Count > 0)
                     {
                         foreach (var point in matches)

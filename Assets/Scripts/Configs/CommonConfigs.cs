@@ -19,6 +19,8 @@ namespace Configs
     public class CommonConfigs : ScriptableObject
     {
         [SerializeField] private int _targetFPS;
+        [Header("Minimum block count for match ")]
+        [SerializeField] private int _matchCount;
         [Space(10)]
         [Header("Block configurations")]
         [SerializeField] private Vector2 _blockSize;
@@ -26,6 +28,7 @@ namespace Configs
         [SerializeField] private List<BlockVisualConfig> _blockVisualConfigs = new ();
         
         public int TargetFPS => _targetFPS;
+        public int MatchCount => _matchCount;
         public Vector2 BlockSize => _blockSize;
         public float BlockZPositionOffset => _blockZPositionOffset;
         public IReadOnlyList<BlockVisualConfig> BlockVisualConfigs => _blockVisualConfigs;
