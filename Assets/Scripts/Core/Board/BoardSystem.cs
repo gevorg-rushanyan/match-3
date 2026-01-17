@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 
 namespace Core.Board
@@ -18,17 +19,17 @@ namespace Core.Board
             _matchCount = matchCount;
         }
         
-        public bool TryMoveBlock(Vector2Int from, Vector2Int to, Vector2Int direction)
+        public MoveType TryMoveBlock(Vector2Int from, Vector2Int to, Vector2Int direction)
         {
             if (!_model.InBounds(from.x, from.y) || !_model.InBounds(to.x, to.y))
             {
-                return false;
+                return MoveType.None;
             }
 
             var fromBlock = _model.Get(from.x, from.y);
             if (fromBlock == null)
             {
-                return false;
+                return MoveType.None;
             }
 
             bool isTargetEmpty = _model.Get(to.x, to.y) == null;
@@ -36,7 +37,7 @@ namespace Core.Board
             // Block Move Up or Down to empty place 
             if (isTargetEmpty && (direction == Vector2Int.up || direction == Vector2Int.down))
             {
-                return false;
+                return MoveType.None;
             }
             
             if (!isTargetEmpty)
@@ -46,7 +47,7 @@ namespace Core.Board
                 _model.Set(from.x, from.y, toBlock);
                 Swap?.Invoke(from, to);
 
-                return true;
+                return MoveType.Swap;
             }
 
             // Move to free space
@@ -56,10 +57,10 @@ namespace Core.Board
                 _model.Remove(from.x, from.y);
                 Move?.Invoke(from, to);
 
-                return true;
+                return MoveType.Move;
             }
 
-            return false;
+            return MoveType.None;
         }
 
         public bool ApplyGravity()

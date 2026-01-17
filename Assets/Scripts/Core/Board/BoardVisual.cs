@@ -18,6 +18,8 @@ namespace Core.Board
         private bool _isInitialized;
         private int _activeAnimations;
         private BlockVisual[,] _visualGrid;
+        
+        public bool IsAnimating => _activeAnimations != 0;
 
         public void Init(CommonConfigs commonConfigs)
         {

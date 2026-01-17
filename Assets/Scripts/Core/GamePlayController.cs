@@ -13,7 +13,7 @@ namespace Core
     public class GamePlayController : MonoBehaviour
     {
         [Min(0.01f)]
-        [SerializeField] private float _gravityDelay;
+        [SerializeField] private float _delayForGravirty;
         [SerializeField] private float _winViewDuration;
         // Dependencies
         private LevelsConfig _levelsConfig;
@@ -137,7 +137,8 @@ namespace Core
                 return;
             }
 
-            if (!_boardSystem.TryMoveBlock(from, to, direction))
+            var moveType = _boardSystem.TryMoveBlock(from, to, direction);
+            if (moveType == MoveType.None)
             {
                 return;
             }
@@ -148,19 +149,23 @@ namespace Core
                 StopCoroutine(_normalizeCoroutine);
             }
             
-            _normalizeCoroutine = StartCoroutine(Normalize());
+            _normalizeCoroutine = StartCoroutine(Normalize(moveType));
         }
         
-        private IEnumerator Normalize()
+        private IEnumerator Normalize(MoveType moveType = MoveType.None)
         {
-            yield return new WaitForSeconds(_gravityDelay);
+            // Means block moved to empty space, delay before gravity
+            if (moveType == MoveType.Move)
+            {
+                yield return new WaitForSeconds(_delayForGravirty);
+            }
 
             while (true)
             {
                 while (_boardSystem.ApplyGravity())
                 {
                     _boardChanged = true;
-                    yield return new WaitForSeconds(_gravityDelay);
+                    yield return new WaitForSeconds(_delayForGravirty);
                 }
                 
                 var matchBlocks = _boardSystem.FindMatches();
@@ -169,9 +174,12 @@ namespace Core
                     break;
                 }
                 
-                _boardSystem.DestroyBlocks(matchBlocks);
+                bool destroyed = _boardSystem.DestroyBlocks(matchBlocks);
                 _boardChanged = true;
-                yield return new WaitForSeconds(_gravityDelay);
+                if (destroyed)
+                {
+                    yield return new WaitForSeconds(_delayForGravirty);
+                }
             }
             
             if (_boardSystem.IsLevelCompleted())

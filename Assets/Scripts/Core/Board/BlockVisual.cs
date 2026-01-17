@@ -91,6 +91,7 @@ namespace Core.Board
             yield return new WaitForSeconds(_destroyDuration);
             callback?.Invoke();
             OnAnimationFinished?.Invoke();
+            _destroyCoroutine = null;
         }
 
         private void OnDestroy()
