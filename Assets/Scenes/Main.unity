@@ -488,7 +488,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gamePlayController: {fileID: 893802364}
   _inputController: {fileID: 1313820004}
-  _boardVisual: {fileID: 1468884297}
+  _boardVisual: {fileID: 991655569}
   _uiManager: {fileID: 1347581047}
   _cameraController: {fileID: 1060096344}
   _backgroundController: {fileID: 1562432968}
@@ -520,8 +520,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbfb0454bb144bb8809a40e8fac1853, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _delayForGravity: 0.6
   _winViewDuration: 1.5
+  _boardController: {fileID: 1468884299}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,8 +623,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 991655568}
+  - component: {fileID: 991655569}
   m_Layer: 0
-  m_Name: BlocksContainer
+  m_Name: BoardVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -645,6 +646,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1468884298}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &991655569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 991655567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29f4340f1e1148a3befa45265e2c6ef9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _blocksContainer: {fileID: 991655568}
 --- !u!1 &1060096342
 GameObject:
   m_ObjectHideFlags: 0
@@ -882,7 +896,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1468884298}
-  - component: {fileID: 1468884297}
+  - component: {fileID: 1468884299}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -890,19 +904,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1468884297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1468884296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29f4340f1e1148a3befa45265e2c6ef9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _blocksContainer: {fileID: 991655568}
 --- !u!4 &1468884298
 Transform:
   m_ObjectHideFlags: 0
@@ -921,6 +922,19 @@ Transform:
   - {fileID: 991655568}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1468884299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1468884296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f81a3b4de8c94118a91848d78c2c2a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gravityDelay: 0.5
 --- !u!1 &1562432966
 GameObject:
   m_ObjectHideFlags: 0
