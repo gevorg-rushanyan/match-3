@@ -20,7 +20,7 @@ namespace Configs
         private void FillMatrix()
         {
             _blocks.Clear();
-            for (int i = 0; i < _width; i++)
+            for (int i = 1; i < _width - 1; i++)
             {
                 for (int j = 0; j < _height; j++)
                 {

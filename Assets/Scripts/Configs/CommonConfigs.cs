@@ -18,14 +18,6 @@ namespace Configs
     [CreateAssetMenu(fileName = "CommonConfigs", menuName = "Configs/CommonConfigs")]
     public class CommonConfigs : ScriptableObject
     {
-        /// <summary>
-        /// These dimensions correspond to the current background dimensions.
-        /// If the matrix will large, based on these dimensions will calculate a new scale.
-        /// </summary>
-        [Space(5)]
-        [Header("These dimensions correspond to the current background dimensions. \n If the matrix will large, based on these dimensions will calculate a new scale.")]
-        [SerializeField] private Vector2 _defaultBackgroundSize;
-        
         [Space(10)]
         [Header("Block configurations")]
         [SerializeField] private Vector2 _blockSize;
