@@ -1,4 +1,5 @@
 using Configs;
+using Core.Background;
 using Core.Board;
 using Core.Input;
 using Core.Persistence;
@@ -15,6 +16,7 @@ namespace Core
         [SerializeField] private UIManager _uiManager;
         [SerializeField] private CameraController _cameraController;
         [SerializeField] private BackgroundController _backgroundController;
+        [SerializeField] private BalloonsController _balloonsController;
         private ResourceProviderService _resourceProviderService;
         private SaveSystem _saveSystem;
         private GameStats _gameStats;
@@ -31,6 +33,7 @@ namespace Core
             }
             
             _backgroundController.Init(_gamePlayController, _commonConfigs);
+            _balloonsController.Init(_gamePlayController, _commonConfigs);
             _cameraController.Init(_gamePlayController, _commonConfigs);
             _gameStats = new GameStats();
             _uiManager.Init(_uiConfigs, _gameStats);

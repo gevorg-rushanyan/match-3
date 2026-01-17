@@ -1,13 +1,13 @@
 using Configs;
 using UnityEngine;
 
-namespace Core.Board
+namespace Core.Background
 {
     public class BackgroundController : MonoBehaviour
     {
-        [SerializeField] private Transform _background;
+        [SerializeField] private Transform _backgroundImage;
         [Space(5)]
-        [Header("These dimensions correspond to the current background dimensions. \n If the matrix will large, based on these dimensions will calculate a new scale.")]
+        [Header("Background Size Settings")]
         [SerializeField] private Vector2 _defaultBackgroundSize;
         private GamePlayController _gamePlayController;
         private CommonConfigs _commonConfigs;
@@ -34,7 +34,7 @@ namespace Core.Board
             
             float multiplier = Mathf.Max(widthMultiplier, heightMultiplier);
             
-            _background.localScale = multiplier <= 1? Vector3.one: Vector3.one * multiplier;
+            _backgroundImage.localScale = multiplier <= 1 ? Vector3.one : Vector3.one * multiplier;
         }
 
         private void OnDestroy()
