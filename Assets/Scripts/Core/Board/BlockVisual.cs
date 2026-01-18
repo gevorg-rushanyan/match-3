@@ -23,8 +23,8 @@ namespace Core.Board
         public BlockType Type => _type;
         public Vector2Int GridPosition => _gridPosition;
         
-        public event Action OnAnimationStarted;
-        public event Action OnAnimationFinished;
+        public event Action AnimationStarted;
+        public event Action AnimationFinished;
         
         private void Awake()
         {
@@ -62,10 +62,10 @@ namespace Core.Board
             if (_moveCoroutine != null)
             {
                 StopCoroutine(_moveCoroutine);
-                OnAnimationFinished?.Invoke();
+                AnimationFinished?.Invoke();
             }
             _state = BlockVisualState.Moving;
-            OnAnimationStarted?.Invoke();
+            AnimationStarted?.Invoke();
             _moveCoroutine = StartCoroutine(MoveCoroutine(worldPos));
         }
 
@@ -74,11 +74,11 @@ namespace Core.Board
             if (_destroyCoroutine != null)
             {
                 StopCoroutine(_destroyCoroutine);
-                OnAnimationFinished?.Invoke();
+                AnimationFinished?.Invoke();
             }
 
             _state = BlockVisualState.Destroying;
-            OnAnimationStarted?.Invoke();
+            AnimationStarted?.Invoke();
             _destroyCoroutine = StartCoroutine(DestroyAnimation(callback));
         }
         
@@ -111,8 +111,8 @@ namespace Core.Board
         
         private void ClearEvents()
         {
-            OnAnimationStarted = null;
-            OnAnimationFinished = null;
+            AnimationStarted = null;
+            AnimationFinished = null;
         }
         
         private IEnumerator MoveCoroutine(Vector3 targetWorldPos)
@@ -133,7 +133,7 @@ namespace Core.Board
             transform.localPosition = targetWorldPos;
             _moveCoroutine = null;
             _state = BlockVisualState.Idle;
-            OnAnimationFinished?.Invoke();
+            AnimationFinished?.Invoke();
         }
 
         private IEnumerator DestroyAnimation(Action callback)
@@ -146,7 +146,7 @@ namespace Core.Board
             yield return _destroyWait;
             
             callback?.Invoke();
-            OnAnimationFinished?.Invoke();
+            AnimationFinished?.Invoke();
             _destroyCoroutine = null;
         }
 

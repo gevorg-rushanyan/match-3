@@ -5,6 +5,7 @@ namespace Core.Board
 {
     public class MatchFinder
     {
+        private const int DefaultCapacity = 32;
         private readonly BoardModel _model;
         private readonly int _matchCount;
         
@@ -15,9 +16,9 @@ namespace Core.Board
         private int _cachedHeight;
         
         // Cached collections to avoid GC allocations
-        private readonly Stack<Vector2Int> _stack = new(32);
-        private readonly HashSet<Vector2Int> _connectedBlocks = new(32);
-        private readonly HashSet<Vector2Int> _resultSet = new(32);
+        private readonly Stack<Vector2Int> _stack = new(DefaultCapacity);
+        private readonly HashSet<Vector2Int> _connectedBlocks = new(DefaultCapacity);
+        private readonly HashSet<Vector2Int> _resultSet = new(DefaultCapacity);
         
         public MatchFinder(BoardModel model, int matchCount)
         {

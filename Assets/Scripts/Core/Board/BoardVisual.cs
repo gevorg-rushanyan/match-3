@@ -91,8 +91,8 @@ namespace Core.Board
                         return;
                     }
                     _visualGrid[x, y] = visual;
-                    visual.OnAnimationStarted += AnimationStarted;
-                    visual.OnAnimationFinished += AnimationFinished;
+                    visual.AnimationStarted += OnAnimationStarted;
+                    visual.AnimationFinished += OnAnimationFinished;
                 }
             }
             SetBoardSystem(boardSystem);
@@ -218,8 +218,8 @@ namespace Core.Board
                 return;
             }
             
-            block.OnAnimationStarted -= AnimationStarted;
-            block.OnAnimationFinished -= AnimationFinished;
+            block.AnimationStarted -= OnAnimationStarted;
+            block.AnimationFinished -= OnAnimationFinished;
             _pool.Return(block);
         }
         
@@ -267,12 +267,12 @@ namespace Core.Board
             return pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
         }
         
-        private void AnimationStarted()
+        private void OnAnimationStarted()
         {
             _activeAnimations++;
         }
         
-        private void AnimationFinished()
+        private void OnAnimationFinished()
         {
             _activeAnimations--;
         }
