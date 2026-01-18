@@ -9,8 +9,9 @@ namespace Core.Board
     {
         [SerializeField] private Transform _blocksContainer;
         
-        private readonly Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new ();
+        private readonly Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new();
         private BoardSystem _boardSystem;
+        private BlockVisualPool _pool;
         private Vector2 _blockSize;
         private float _blockZPositionOffset;
         private int _width; 
@@ -36,7 +37,21 @@ namespace Core.Board
                 }
             }
 
+            InitializePool();
             _isInitialized = true;
+        }
+        
+        private void InitializePool()
+        {
+            _pool = new BlockVisualPool(_blocksContainer);
+            
+            foreach (var config in _blockVisualConfigs)
+            {
+                if (config.Value.Prefab != null)
+                {
+                    _pool.RegisterPrefab(config.Key, config.Value.Prefab);
+                }
+            }
         }
 
         public void CreateBoard(BoardModel model, BoardSystem boardSystem)
@@ -69,7 +84,7 @@ namespace Core.Board
                     }
 
                     var gridPosition = blockData.Position;
-                    var visual = TryCreateBlock(gridPosition, blockData.Type);
+                    var visual = GetBlock(gridPosition, blockData.Type);
                     if (visual == null)
                     {
                         Debug.LogError("Create block failed");
@@ -88,9 +103,9 @@ namespace Core.Board
         {
             UnsubscribeFromBoardEvents();
             _boardSystem = boardSystem;
-            _boardSystem.Move += Move;
-            _boardSystem.Swap += Swap;
-            _boardSystem.Destroy += Destroy;
+            _boardSystem.Move += MoveBlock;
+            _boardSystem.Swap += SwapBlocks;
+            _boardSystem.Destroy += DestroyBlock;
         }
 
         private void UnsubscribeFromBoardEvents()
@@ -100,13 +115,13 @@ namespace Core.Board
                 return;
             }
             
-            _boardSystem.Move -= Move;
-            _boardSystem.Swap -= Swap;
-            _boardSystem.Destroy -= Destroy;
+            _boardSystem.Move -= MoveBlock;
+            _boardSystem.Swap -= SwapBlocks;
+            _boardSystem.Destroy -= DestroyBlock;
             _boardSystem = null;
         }
 
-        private void Move(Vector2Int from, Vector2Int to)
+        private void MoveBlock(Vector2Int from, Vector2Int to)
         {
             if (_visualGrid == null)
             {
@@ -137,7 +152,7 @@ namespace Core.Board
             block.MoveTo(GridToWorldPosition(to.x, to.y));
         }
         
-        private void Swap(Vector2Int a, Vector2Int b)
+        private void SwapBlocks(Vector2Int a, Vector2Int b)
         {
             if (_visualGrid == null)
             {
@@ -167,7 +182,7 @@ namespace Core.Board
             blockB.MoveTo(GridToWorldPosition(a.x, a.y));
         }
         
-        private void Destroy(Vector2Int pos)
+        private void DestroyBlock(Vector2Int pos)
         {
             var block = _visualGrid[pos.x, pos.y];
             if (block == null)
@@ -178,27 +193,34 @@ namespace Core.Board
             _visualGrid[pos.x, pos.y] = null;
             block.PlayDestroyAnimation(() =>
             {
-                Destroy(block.gameObject);
+                ReturnBlock(block);
             });
         }
 
-        private BlockVisual TryCreateBlock(Vector2Int position, BlockType blockType)
+        private BlockVisual GetBlock(Vector2Int position, BlockType blockType)
         {
             var worldPosition = GridToWorldPosition(position.x, position.y);
 
-            if (!_blockVisualConfigs.TryGetValue(blockType, out var visualConfig))
+            var block = _pool.Get(blockType);
+            if (block == null)
             {
                 return null;
             }
-
-            if (visualConfig.Prefab == null)
+            
+            block.Init(blockType, position, worldPosition);
+            return block;
+        }
+        
+        private void ReturnBlock(BlockVisual block)
+        {
+            if (block == null)
             {
-                return null;
+                return;
             }
-
-            BlockVisual blockVisual = Instantiate(visualConfig.Prefab, _blocksContainer);
-            blockVisual.Init(blockType, position, worldPosition);
-            return blockVisual;
+            
+            block.OnAnimationStarted -= AnimationStarted;
+            block.OnAnimationFinished -= AnimationFinished;
+            _pool.Return(block);
         }
         
         private Vector3 GridToWorldPosition(int x, int y)
@@ -223,9 +245,7 @@ namespace Core.Board
                     var block = _visualGrid[x, y];
                     if (block != null)
                     {
-                        block.OnAnimationStarted -= AnimationStarted;
-                        block.OnAnimationFinished -= AnimationFinished;
-                        Destroy(block.gameObject);
+                        ReturnBlock(block);
                         _visualGrid[x, y] = null;
                     }
                 }
@@ -260,6 +280,7 @@ namespace Core.Board
         private void OnDestroy()
         {
             UnsubscribeFromBoardEvents();
+            _pool?.Clear();
         }
     }
 }

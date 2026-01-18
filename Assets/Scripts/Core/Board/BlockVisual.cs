@@ -11,26 +11,45 @@ namespace Core.Board
         [SerializeField] private Animator _animator;
         [SerializeField] private float _moveDuration = 0.15f;
         [SerializeField] private float _destroyDuration = 0.15f;
+        
         private BlockVisualState _state;
         private BlockType _type;
         private Vector2Int _gridPosition;
         private Coroutine _moveCoroutine;
         private Coroutine _destroyCoroutine;
+        private WaitForSeconds _destroyWait;
         
         public BlockVisualState State => _state;
+        public BlockType Type => _type;
+        public Vector2Int GridPosition => _gridPosition;
+        
         public event Action OnAnimationStarted;
         public event Action OnAnimationFinished;
         
-        public Vector2Int GridPosition => _gridPosition;
+        private void Awake()
+        {
+            _destroyWait = new WaitForSeconds(_destroyDuration);
+        }
         
         public void Init(BlockType type, Vector2Int gridPosition, Vector3 worldPosition)
         {
-            _animator.SetBool(DestroyTrigger, false);
-            _state = BlockVisualState.Idle;
             _type = type;
             _gridPosition = gridPosition;
             transform.localPosition = worldPosition;
+            
+            ResetState();
+        }
+
+        public void Activate()
+        {
             gameObject.SetActive(true);
+        }
+        
+        public void Deactivate()
+        {
+            StopAllAnimations();
+            ClearEvents();
+            gameObject.SetActive(false);
         }
 
         public void SetGridPosition(Vector2Int pos)
@@ -40,7 +59,6 @@ namespace Core.Board
 
         public void MoveTo(Vector3 worldPos)
         {
-            // transform.localPosition = worldPos;
             if (_moveCoroutine != null)
             {
                 StopCoroutine(_moveCoroutine);
@@ -62,6 +80,39 @@ namespace Core.Board
             _state = BlockVisualState.Destroying;
             OnAnimationStarted?.Invoke();
             _destroyCoroutine = StartCoroutine(DestroyAnimation(callback));
+        }
+        
+        private void ResetState()
+        {
+            _state = BlockVisualState.Idle;
+            
+            if (_animator != null)
+            {
+                _animator.SetBool(DestroyTrigger, false);
+            }
+        }
+        
+        private void StopAllAnimations()
+        {
+            if (_moveCoroutine != null)
+            {
+                StopCoroutine(_moveCoroutine);
+                _moveCoroutine = null;
+            }
+
+            if (_destroyCoroutine != null)
+            {
+                StopCoroutine(_destroyCoroutine);
+                _destroyCoroutine = null;
+            }
+            
+            _state = BlockVisualState.Idle;
+        }
+        
+        private void ClearEvents()
+        {
+            OnAnimationStarted = null;
+            OnAnimationFinished = null;
         }
         
         private IEnumerator MoveCoroutine(Vector3 targetWorldPos)
@@ -87,8 +138,13 @@ namespace Core.Board
 
         private IEnumerator DestroyAnimation(Action callback)
         {
-            _animator.SetBool(DestroyTrigger, true);
-            yield return new WaitForSeconds(_destroyDuration);
+            if (_animator != null)
+            {
+                _animator.SetBool(DestroyTrigger, true);
+            }
+            
+            yield return _destroyWait;
+            
             callback?.Invoke();
             OnAnimationFinished?.Invoke();
             _destroyCoroutine = null;
@@ -96,17 +152,7 @@ namespace Core.Board
 
         private void OnDestroy()
         {
-            if (_moveCoroutine != null)
-            {
-                StopCoroutine(_moveCoroutine);
-                OnAnimationFinished?.Invoke();
-            }
-
-            if (_destroyCoroutine != null)
-            {
-                StopCoroutine(_destroyCoroutine);
-                OnAnimationFinished?.Invoke();
-            }
+            StopAllAnimations();
         }
     }
 }
