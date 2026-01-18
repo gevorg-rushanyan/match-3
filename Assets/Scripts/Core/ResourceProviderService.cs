@@ -59,7 +59,6 @@ namespace Core
             var result = Resources.Load<UIConfigs>(UIConfigsPath);
             if (result == null)
             {
-                Debug.LogError("UIConfigs load FAILED");
                 return null;
             }
                 
