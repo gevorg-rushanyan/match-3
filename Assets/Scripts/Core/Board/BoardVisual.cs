@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Configs;
 using Enums;
@@ -19,6 +20,7 @@ namespace Core.Board
         private bool _isInitialized;
         private int _activeAnimations;
         private BlockVisual[,] _visualGrid;
+        private Coroutine _createBlocksCoroutine;
         
         public bool IsAnimating => _activeAnimations != 0;
 
@@ -72,7 +74,16 @@ namespace Core.Board
             _width = model.Width;
             _height = model.Height;
             _visualGrid = new BlockVisual[_width, _height];
+            
+            StopCreateBlocksCoroutine();
+            _createBlocksCoroutine = StartCoroutine(CreateBlocks(model));
 
+            SetBoardSystem(boardSystem);
+            CenterBoardHorizontally();
+        }
+
+        private IEnumerator CreateBlocks(BoardModel model)
+        {
             for (int x = 0; x < _width; x++)
             {
                 for (int y = 0; y < _height; y++)
@@ -88,15 +99,21 @@ namespace Core.Board
                     if (visual == null)
                     {
                         Debug.LogError("Create block failed");
-                        return;
+                        _createBlocksCoroutine = null;
+                        yield break;
                     }
                     _visualGrid[x, y] = visual;
                     visual.AnimationStarted += OnAnimationStarted;
                     visual.AnimationFinished += OnAnimationFinished;
+
+                    if (x + y % 10 == 0)
+                    {
+                        yield return null;
+                    }
                 }
             }
-            SetBoardSystem(boardSystem);
-            CenterBoardHorizontally();
+            
+            _createBlocksCoroutine = null;
         }
 
         private void SetBoardSystem(BoardSystem boardSystem)
@@ -277,8 +294,20 @@ namespace Core.Board
             _activeAnimations--;
         }
 
+        private void StopCreateBlocksCoroutine()
+        {
+            if (_createBlocksCoroutine == null)
+            {
+                return;
+            }
+            
+            StopCoroutine(_createBlocksCoroutine);
+            _createBlocksCoroutine = null;
+        }
+
         private void OnDestroy()
         {
+            StopCreateBlocksCoroutine();
             UnsubscribeFromBoardEvents();
             _pool?.Clear();
         }

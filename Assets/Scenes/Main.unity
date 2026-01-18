@@ -934,7 +934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f81a3b4de8c94118a91848d78c2c2a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gravityDelay: 0.5
+  _gravityDelay: 0.4
 --- !u!1 &1562432966
 GameObject:
   m_ObjectHideFlags: 0
