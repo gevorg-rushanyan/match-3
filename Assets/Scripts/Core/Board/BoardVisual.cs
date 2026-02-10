@@ -82,6 +82,27 @@ namespace Core.Board
             CenterBoardHorizontally();
         }
 
+        public BlockVisual GetBlock(Vector2 worldPosition)
+        {
+            Vector2 localPos = worldPosition;
+            localPos.x -= _blocksContainer.position.x;
+
+            int i = Mathf.FloorToInt(localPos.x / _blockSize.x);
+            int j = Mathf.FloorToInt(localPos.y / _blockSize.y);
+
+            if (i < 0 || i >= _width || j < 0 || j >= _height)
+            {
+                return null;
+            }
+            
+            if (InBounds(new Vector2Int(i, j)))
+            {
+                return _visualGrid[i, j];
+            }
+            
+            return null;
+        }
+
         private IEnumerator CreateBlocks(BoardModel model)
         {
             for (int x = 0; x < _width; x++)

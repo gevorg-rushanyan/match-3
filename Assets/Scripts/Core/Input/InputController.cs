@@ -11,6 +11,8 @@ namespace Core.Input
         [SerializeField] private LayerMask _blockLayer;
         [SerializeField] private SwipeInput _swipeInput;
 
+        private BoardVisual _boardVisual;
+        
         public event Action<Vector2Int, Vector2Int, Vector2Int> OnSwipe;
         
         private void Awake()
@@ -19,6 +21,11 @@ namespace Core.Input
             {
                 _swipeInput.OnSwipe += HandleSwipe;
             }
+        }
+
+        public void Init(BoardVisual boardVisual)
+        {
+            _boardVisual = boardVisual;
         }
 
         private void HandleSwipe(Vector2 screenPos, SwipeDirection swipeDirection)
@@ -44,15 +51,7 @@ namespace Core.Input
         private BlockVisual GetBlockUnderScreen(Vector2 screenPos)
         {
             Vector2 worldPos = _camera.ScreenToWorldPoint(screenPos);
-
-            RaycastHit2D hit = Physics2D.Raycast(worldPos, Vector2.zero, Mathf.Infinity, _blockLayer);
-
-            if (hit.collider != null)
-            {
-                return hit.collider.GetComponent<BlockVisual>();
-            }
-
-            return null;
+            return _boardVisual.GetBlock(worldPos);
         }
 
         private Vector2Int DirectionToOffset(SwipeDirection direction)
