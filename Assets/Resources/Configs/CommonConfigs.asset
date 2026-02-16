@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CommonConfigs
   m_EditorClassIdentifier: 
   _targetFPS: 60
+  _maxBlockCountToCreateInOneFrame: 10
   _matchCount: 3
   _blockSize: {x: 0.89, y: 0.8}
   _blockZPositionOffset: -0.01

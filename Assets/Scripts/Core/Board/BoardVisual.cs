@@ -13,6 +13,7 @@ namespace Core.Board
         private readonly Dictionary<BlockType, BlockVisualConfig> _blockVisualConfigs = new();
         private BoardSystem _boardSystem;
         private BlockVisualPool _pool;
+        private int _maxBlockCountToCreateInOneFrame;
         private Vector2 _blockSize;
         private float _blockZPositionOffset;
         private int _width; 
@@ -26,6 +27,7 @@ namespace Core.Board
 
         public void Init(CommonConfigs commonConfigs)
         {
+            _maxBlockCountToCreateInOneFrame = commonConfigs.MaxBlockCountToCreateInOneFrame;
             _blockSize = commonConfigs.BlockSize;
             _blockZPositionOffset = commonConfigs.BlockZPositionOffset;
             
@@ -127,7 +129,8 @@ namespace Core.Board
                     visual.AnimationStarted += OnAnimationStarted;
                     visual.AnimationFinished += OnAnimationFinished;
 
-                    if (x + y % 10 == 0)
+                    // Not to block the main thread, optional
+                    if (x + y % _maxBlockCountToCreateInOneFrame == 0)
                     {
                         yield return null;
                     }
