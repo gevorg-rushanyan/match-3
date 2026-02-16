@@ -5,7 +5,8 @@ The project was intentionally kept as simple and readable as possible, without u
 
 apk: https://drive.google.com/file/d/1RNBHJLPJ145X72-d8o94KktxChgk8qRa/view?usp=sharing
 
-![](./Images/ScreenShot.png)
+<img src="./Images/ScreenShot.png" width="150" height="250">
+
 ---
 
 ## Game Board
@@ -43,7 +44,7 @@ Normalization consists of two repeating steps and continues as long as further n
 2. If, after a match, a connected area of same-type blocks contains a vertical or horizontal line of **three or more blocks**, the entire connected area is destroyed simultaneously.
 3. A connected area consists of blocks of the same type adjacent **vertically or horizontally** (diagonal connections do not count).
 
-![](./Images/ValidAreas.png)
+<img src="./Images/ValidAreas.png" width="300" height="200">
 
 The areas shown in the image as examples are valid and must be destroyed entirely.
 
