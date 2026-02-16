@@ -124,21 +124,7 @@ namespace Core.Board
             foreach (var block in blocks)
             {
                 // Check horizontal match
-                int horizontalCount = 1;
-                
-                var left = block + Vector2Int.left;
-                while (blocks.Contains(left))
-                {
-                    horizontalCount++;
-                    left += Vector2Int.left;
-                }
-                
-                var right = block + Vector2Int.right;
-                while (blocks.Contains(right))
-                {
-                    horizontalCount++;
-                    right += Vector2Int.right;
-                }
+                int horizontalCount = GetMatchCountByDirection(block, blocks, new [] { Vector2Int.left, Vector2Int.right });
                 
                 if (horizontalCount >= _matchCount)
                 {
@@ -146,21 +132,7 @@ namespace Core.Board
                 }
                 
                 // Check vertical match
-                int verticalCount = 1;
-                
-                var down = block + Vector2Int.down;
-                while (blocks.Contains(down))
-                {
-                    verticalCount++;
-                    down += Vector2Int.down;
-                }
-                
-                var up = block + Vector2Int.up;
-                while (blocks.Contains(up))
-                {
-                    verticalCount++;
-                    up += Vector2Int.up;
-                }
+                int verticalCount = GetMatchCountByDirection(block, blocks, new [] { Vector2Int.down, Vector2Int.up });
                 
                 if (verticalCount >= _matchCount)
                 {
@@ -171,6 +143,23 @@ namespace Core.Board
             return false;
         }
         
+        private int GetMatchCountByDirection(Vector2Int block, HashSet<Vector2Int> blocks, Vector2Int[] directions)
+        {
+            int count = 1;
+            
+            foreach (var direction in directions)
+            {
+                var nextItem = block + direction;
+                while (blocks.Contains(nextItem))
+                {
+                    count++;
+                    nextItem += direction;
+                }
+            }
+            
+            return count;
+        }
+
         private void EnsureVisitedCache()
         {
             if (_visited == null || _cachedWidth != _model.Width || _cachedHeight != _model.Height)
