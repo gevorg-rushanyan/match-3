@@ -44,6 +44,7 @@ Normalization consists of two repeating steps and continues as long as further n
 3. A connected area consists of blocks of the same type adjacent **vertically or horizontally** (diagonal connections do not count).
 
 ![](./Images/ValidAreas.png)
+
 The areas shown in the image as examples are valid and must be destroyed entirely.
 
 ---
