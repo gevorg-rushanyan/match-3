@@ -5,33 +5,46 @@ The project was intentionally kept as simple and readable as possible, without u
 
 apk: https://drive.google.com/file/d/1RNBHJLPJ145X72-d8o94KktxChgk8qRa/view?usp=sharing
 
+![](./Images/ScreenShot.png)
 ---
 
-## Technologies
+## Game Board
 
-- **Engine:** Unity 2022.3.62f2 (LTS)
-- **Language:** C#
-- **Scenes:** 1 (`Main`)
-
-**No third-party plugins are used:**
-- DoTween
-- UniTask
-- Zenject
-
-All logic is implemented using standard Unity features only.
+- The board consists of two types of blocks (**Fire** and **Water**).
+- The player can move any block one cell per turn in one of four directions: **up, down, left, right**.
+- If there is another block in the direction of movement, the two blocks **swap places**.
+- If the target cell is empty, the block moves into that cell.
+- Moving a block upward is only possible by swapping with the block above — it is **not allowed** to “throw” a block upward into empty space.
 
 ---
 
-## Gameplay Description
+## Normalization and Movement
 
-- Classic match-3 mechanics
-- The game board consists of blocks of different types
-- Blocks are moved using swipe gestures
-- After each move, the board is normalized:
-  - gravity is applied
-  - matches are searched
-  - matched blocks are destroyed
-- A level is considered completed when **all blocks are destroyed**
+- After each move, the board is **normalized**.
+- Movement is performed using a **swipe gesture**.
+- While normalization is in progress, the player may move blocks that are **not falling or being destroyed**.
+- Blocks that are currently falling or marked for destruction **cannot be interacted with**.
+
+---
+
+## Game Objective
+
+- Destroy all blocks using the **minimum number of moves**.
+- When all blocks are destroyed (victory), the game automatically transitions to the next level after the final destruction animation completes.
+- The number of moves is **unlimited** — the player may make as many moves as desired.
+
+---
+
+## Board Normalization
+
+Normalization consists of two repeating steps and continues as long as further normalization is possible:
+
+1. All “floating” blocks fall downward.
+2. If, after a match, a connected area of same-type blocks contains a vertical or horizontal line of **three or more blocks**, the entire connected area is destroyed simultaneously.
+3. A connected area consists of blocks of the same type adjacent **vertically or horizontally** (diagonal connections do not count).
+
+![](./Images/ValidAreas.png)
+The areas shown in the image as examples are valid and must be destroyed entirely.
 
 ---
 
@@ -50,6 +63,21 @@ Application.persistentDataPath/game_save.json
   - when the application is minimized
   - when the application is closed
   - after any change to the game board state
+
+---
+
+## Technologies
+
+- **Engine:** Unity 2022.3.62f2 (LTS)
+- **Language:** C#
+- **Scenes:** 1 (`Main`)
+
+**No third-party plugins are used:**
+- DoTween
+- UniTask
+- Zenject
+
+All logic is implemented using standard Unity features only.
 
 ---
 
